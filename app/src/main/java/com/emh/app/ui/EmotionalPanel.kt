@@ -198,8 +198,10 @@ fun EmotionalPanel(
                 onClick = {
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                     isLoading = true
+                    val willUseVision = visionAttached || lastUsedVision
                     statusMessage = when {
-                        visionAttached -> "Analyzing screenshot with vision model..."
+                        willUseVision && !OllamaClient.isLikelyVisionModel(currentModel) -> "Auto-switching to vision model + analyzing screenshot..."
+                        willUseVision -> "Analyzing screenshot with vision model..."
                         else -> "Crafting emotionally intelligent reply..."
                     }
                     scope.launch {
@@ -215,8 +217,14 @@ fun EmotionalPanel(
 
                         lastUsedVision = imageBase64 != null
 
+                        val effectiveModel = if (imageBase64 != null && !OllamaClient.isLikelyVisionModel(currentModel)) {
+                            OllamaClient.suggestVisionModelIfNeeded(currentModel)
+                        } else {
+                            currentModel
+                        }
+
                         val result = if (imageBase64 != null) {
-                            ollama.generateWithImages(currentModel, prompt, listOf(imageBase64))
+                            ollama.generateWithImages(effectiveModel, prompt, listOf(imageBase64))
                         } else {
                             ollama.generate(currentModel, prompt)
                         }

@@ -83,6 +83,20 @@ dependencies {
     // DataStore for settings
     implementation("androidx.datastore:datastore-preferences:1.1.1")
 
-    // AUTONOMOUS IMPROVEMENT (Loop 1+): Added for future testing libraries (will be activated in even loops).
-    // testImplementation("junit:junit:4.13.2")
+    // ==================== TESTING ====================
+    // Unit testing
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:5.4.0")
+    testImplementation("com.google.truth:truth:1.4.4")
+
+    // Compose UI testing
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
+    androidTestImplementation("androidx.test.ext:junit:1.2.1")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
+    debugImplementation("androidx.compose.ui:ui-test-manifest")
+
+    // Room testing
+    testImplementation("androidx.room:room-testing:2.6.1")
 }

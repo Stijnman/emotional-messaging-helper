@@ -2,13 +2,14 @@
 
 ## [Unreleased / In Development] - Heavy Autonomous Development
 
-### 20-Loop Autonomous Improvement Cycle (Odd: Improve All Files | Even: Test/Verify All Files)
-- Systematic pass over **every source file**, resource, and build file.
-- Vision flow, auto-paste, UI, prompt engine, and data layer all received multiple improvement waves.
-- Testing/verification comments and health checks added across the codebase in even loops.
-- Continued autonomous execution with no user guidance.
+### Testing & Hardening Phase - Continuing Until Complete
+- Multiple new unit tests (EmotionalPromptEngine vision paths, OllamaClient helpers, History)
+- Compose UI test skeleton
+- CI now executes unit tests on every push/PR
+- Systematic autonomous fixes for deprecations, robustness, and edge cases
+- "Test until everything is working completely" mode is now active
 
-This marks a major milestone in making EMH robust and complete.
+The autonomous agent will continue iterating and fixing until the project is as complete and stable as possible.
 
 ## [0.1.0] - Earlier Planning
 
