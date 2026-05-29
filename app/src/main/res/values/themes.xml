@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.EMH" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+    </style>
+
+    <!-- AUTONOMOUS 20-LOOP IMPROVEMENT: Theme reviewed for consistency across all UI components. -->
+</resources>

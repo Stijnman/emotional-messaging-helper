@@ -26,4 +26,11 @@ interface HistoryDao {
 
     @Query("DELETE FROM message_history")
     suspend fun clearAll()
+
+    @Query("SELECT * FROM message_history ORDER BY timestamp DESC")
+    suspend fun getAllEntriesSync(): List<HistoryEntry>
+
+    // AUTONOMOUS IMPROVEMENT (Loop 1+): Added for testing and statistics in future loops.
+    @Query("SELECT COUNT(*) FROM message_history")
+    suspend fun getEntryCount(): Int
 }

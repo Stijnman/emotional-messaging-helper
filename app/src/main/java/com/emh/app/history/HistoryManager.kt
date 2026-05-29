@@ -29,6 +29,14 @@ class HistoryManager(context: Context) {
     }
 
     suspend fun exportHistoryAsJson(): String {
-        return "[] // TODO: Implement proper JSON export"
+        val entries = dao.getAllEntriesSync()
+        return com.google.gson.GsonBuilder().setPrettyPrinting().create().toJson(entries)
     }
+
+    suspend fun getAllEntriesSync(): List<HistoryEntry> {
+        return dao.getAllEntriesSync()
+    }
+
+    // AUTONOMOUS IMPROVEMENT (Loop 1+): Added method for future testing/verification of history integrity.
+    suspend fun countEntries(): Int = dao.getAllEntriesSync().size
 }

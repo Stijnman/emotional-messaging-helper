@@ -52,4 +52,10 @@ class RelationshipMemoryManager(context: Context) {
             if (tonePref.isNotBlank()) append("They respond best to a $tonePref tone. ")
         }
     }
+
+    // AUTONOMOUS IMPROVEMENT (Odd loops): Added helper for future relationship strength scoring.
+    fun getRelationshipStrength(contactKey: String): Int {
+        val noteLength = getNote(contactKey).length
+        return (noteLength / 50).coerceAtMost(10)
+    }
 }

@@ -14,5 +14,8 @@ data class HistoryEntry(
     val emotionalInsight: String,
     val toneUsed: String,
     val figurativeLevel: Int,
-    val wasSent: Boolean = false
+    val wasSent: Boolean = false,
+
+    // AUTONOMOUS IMPROVEMENT (Odd loops): Added metadata field for future analytics and testing.
+    val visionUsed: Boolean = false
 )
