@@ -170,7 +170,7 @@ fun EmotionalPanel(
                         }
                     }
                     Text(
-                        "Next generation will include visual context from the screenshot.",
+                        "Next generation will include visual context from the screenshot (compressed for faster analysis).",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onTertiaryContainer
                     )

@@ -108,10 +108,8 @@ class ScreenCaptureService : Service() {
                 // Crop to actual screen size
                 val cropped = Bitmap.createBitmap(bitmap, 0, 0, width, height)
 
-                // Convert to base64 JPEG for Ollama vision
-                val outputStream = java.io.ByteArrayOutputStream()
-                cropped.compress(Bitmap.CompressFormat.JPEG, 80, outputStream)
-                val base64Image = android.util.Base64.encodeToString(outputStream.toByteArray(), android.util.Base64.NO_WRAP)
+                // Convert to base64 JPEG for Ollama vision (using improved helper)
+                val base64Image = ScreenshotHelper.bitmapToBase64(cropped, ScreenshotHelper.getRecommendedQuality())
 
                 // Store for the floating panel to pick up
                 LastScreenshot.base64 = base64Image

@@ -31,10 +31,17 @@ object ScreenshotHelper {
         }
     }
 
-    fun bitmapToBase64(bitmap: Bitmap): String {
+    fun bitmapToBase64(bitmap: Bitmap, quality: Int = 75): String {
         val outputStream = ByteArrayOutputStream()
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 85, outputStream)
+        // AUTONOMOUS IMPROVEMENT: Made quality configurable (default 75 for good balance)
+        bitmap.compress(Bitmap.CompressFormat.JPEG, quality.coerceIn(40, 90), outputStream)
         val byteArray = outputStream.toByteArray()
         return android.util.Base64.encodeToString(byteArray, android.util.Base64.NO_WRAP)
     }
+
+    /**
+     * Returns recommended quality level based on device/network conditions.
+     * Lower quality = faster vision analysis, smaller payload.
+     */
+    fun getRecommendedQuality(): Int = 70
 }

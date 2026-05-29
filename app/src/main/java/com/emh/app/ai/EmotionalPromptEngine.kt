@@ -47,6 +47,7 @@ class EmotionalPromptEngine(
             The user has also attached the actual screenshot image for your direct analysis. Use the visual details from the image (not just the text description) to craft a more accurate and emotionally resonant reply.
 
             // AUTONOMOUS LOOP IMPROVEMENT (Odd rounds): Strengthened vision guidance for better emotional accuracy.
+            // When vision is provided, prioritize emotional signals visible in the image over pure text analysis.
             """.trimIndent()
         } else ""
 
