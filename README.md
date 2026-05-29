@@ -14,7 +14,15 @@ The app has been developed fully autonomously across 10 improvement loops with h
 - **Settings**: Persistent and live (URL + model used immediately).
 - **Auto-paste**: Best-effort direct typing + reliable clipboard fallback with clear toasts.
 
-After multiple autonomous improvement loops (including a dedicated 10-loop polish cycle + continued execution + ongoing 20-loop systematic improvement across **all files**), the app is in a highly polished and usable state. The vision + emotional intelligence combination is now one of its strongest features.
+After extensive autonomous development (including 20+ systematic improvement loops across **all files** + dedicated testing phase with continuous fixes), the app is being iteratively hardened until it is as complete and reliable as possible.
+
+### Current Focus
+- Unit tests for core AI and data components (EmotionalPromptEngine, OllamaClient, HistoryManager, etc.)
+- Compose UI tests for the floating panel
+- CI pipeline improvements to run tests on every push/PR
+- Increasing test coverage and reliability
+
+The project is transitioning from pure feature development into quality assurance and hardening.
 
 ## Features (Vision)
 

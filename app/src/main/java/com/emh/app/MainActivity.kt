@@ -62,8 +62,8 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun requestScreenCapture() {
-        val projectionManager = getSystemService(MEDIA_PROJECTION_SERVICE) as android.media.projection.MediaProjectionManager
-        val intent = projectionManager.createScreenCaptureIntent()
+        // Using the modern recommended approach
+        val intent = ScreenCaptureManager.createScreenCaptureIntent(this)
         screenCaptureLauncher.launch(intent)
     }
 

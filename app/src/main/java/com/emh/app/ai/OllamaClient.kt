@@ -123,4 +123,33 @@ class OllamaClient(
     suspend fun healthCheck(): Boolean {
         return isAvailable() // Can be expanded in future loops
     }
+
+    /**
+     * Recommended vision models for EMH.
+     * These work well for screenshot analysis.
+     */
+    companion object {
+        val RECOMMENDED_VISION_MODELS = listOf(
+            "llava",
+            "llava-llama3",
+            "moondream",
+            "bakllava"
+        )
+
+        /**
+         * Simple heuristic to suggest if a model name looks like a vision model.
+         * Used for better UX and warnings.
+         */
+        fun isLikelyVisionModel(model: String): Boolean {
+            val lower = model.lowercase()
+            return lower.contains("llava") || lower.contains("vision") || lower.contains("moondream")
+        }
+
+        /**
+         * AUTONOMOUS IMPROVEMENT: Returns a recommended vision model if the current one doesn't look like one.
+         */
+        fun suggestVisionModelIfNeeded(currentModel: String): String {
+            return if (isLikelyVisionModel(currentModel)) currentModel else "llava"
+        }
+    }
 }

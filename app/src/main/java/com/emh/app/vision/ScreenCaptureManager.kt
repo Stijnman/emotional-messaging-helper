@@ -14,20 +14,32 @@ object ScreenCaptureManager {
 
     const val REQUEST_CODE_SCREEN_CAPTURE = 4242
 
-    fun requestScreenCapture(activity: Activity) {
-        val projectionManager = activity.getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
-        val intent = projectionManager.createScreenCaptureIntent()
-        activity.startActivityForResult(intent, REQUEST_CODE_SCREEN_CAPTURE)
+    /**
+     * Preferred modern method: Use this to get the intent, then launch it with an ActivityResultLauncher.
+     */
+    fun createScreenCaptureIntent(context: Context): Intent {
+        val projectionManager = context.getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
+        return projectionManager.createScreenCaptureIntent()
     }
 
+    /**
+     * Handle result from the modern ActivityResultLauncher.
+     */
     fun handleScreenCaptureResult(
-        requestCode: Int,
         resultCode: Int,
         data: Intent?,
         onSuccess: (resultCode: Int, data: Intent) -> Unit
     ) {
-        if (requestCode == REQUEST_CODE_SCREEN_CAPTURE && resultCode == Activity.RESULT_OK && data != null) {
+        if (resultCode == Activity.RESULT_OK && data != null) {
             onSuccess(resultCode, data)
         }
+    }
+
+    // Kept only for backward compatibility during heavy autonomous development.
+    @Deprecated("Use createScreenCaptureIntent + launcher instead", level = DeprecationLevel.WARNING)
+    fun requestScreenCapture(activity: Activity) {
+        val intent = createScreenCaptureIntent(activity)
+        @Suppress("DEPRECATION")
+        activity.startActivityForResult(intent, REQUEST_CODE_SCREEN_CAPTURE)
     }
 }
