@@ -46,6 +46,14 @@ jobs:
       - name: Run ktlint (if configured)
         run: ./gradlew ktlintCheck || true
 
+      - name: Upload test results (when tests exist)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ github.sha }}
+          path: app/build/reports/tests/
+          retention-days: 7
+
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
         with:
