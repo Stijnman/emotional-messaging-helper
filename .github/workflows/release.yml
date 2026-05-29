@@ -56,3 +56,6 @@ jobs:
             - Major UI improvements
 
             **Note:** This is a debug-oriented release. Signed production builds coming soon.
+
+            ---
+            **Full Changelog**: https://github.com/Stijnman/emotional-messaging-helper/compare/previous-tag...${{ github.event.inputs.version }}

@@ -43,6 +43,9 @@ jobs:
       - name: Run Lint
         run: ./gradlew lintDebug
 
+      - name: Run ktlint (if configured)
+        run: ./gradlew ktlintCheck || true
+
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
         with:

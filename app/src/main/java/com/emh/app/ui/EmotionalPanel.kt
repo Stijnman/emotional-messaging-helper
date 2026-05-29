@@ -174,6 +174,20 @@ fun EmotionalPanel(
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onTertiaryContainer
                     )
+                    // Small improvement: Allow recapturing without leaving the panel
+                    TextButton(
+                        onClick = {
+                            // Trigger MainActivity to request new capture
+                            val intent = Intent(context, com.emh.app.MainActivity::class.java).apply {
+                                action = "REQUEST_SCREEN_CAPTURE"
+                                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                            }
+                            context.startActivity(intent)
+                        },
+                        modifier = Modifier.align(androidx.compose.ui.Alignment.End)
+                    ) {
+                        Text("Recapture")
+                    }
                 }
             }
             Spacer(Modifier.height(12.dp))
