@@ -1,0 +1,58 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag (e.g. v0.1.0)'
+        required: true
+        default: 'v0.1.0'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Grant execute permission
+        run: chmod +x gradlew
+
+      - name: Build Release APK
+        run: ./gradlew assembleRelease --build-cache
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.inputs.version }}
+          name: Emotional Messaging Helper ${{ github.event.inputs.version }}
+          draft: true
+          prerelease: false
+          files: |
+            app/build/outputs/apk/release/*.apk
+          generate_release_notes: true
+          body: |
+            ## Emotional Messaging Helper ${{ github.event.inputs.version }}
+
+            ### What's New
+            - Message History with search
+            - Real vision support (Llava)
+            - Encrypted Memory
+            - Model selection foundation
+            - Major UI improvements
+
+            **Note:** This is a debug-oriented release. Signed production builds coming soon.
