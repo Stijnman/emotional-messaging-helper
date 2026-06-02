@@ -7,6 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.emh.app.EMHApplication
+import com.emh.app.ai.OllamaClient
 import kotlinx.coroutines.launch
 
 @Composable
@@ -29,7 +30,6 @@ fun SettingsScreen() {
         repo.defaultModel.collect { model = it }
     }
     // AUTONOMOUS: Settings are live - panel observes via LaunchedEffect in EmotionalPanel for instant use
-    }
     LaunchedEffect(Unit) {
         repo.autoAnalyze.collect { autoAnalyze = it }
     }
@@ -57,6 +57,42 @@ fun SettingsScreen() {
             label = { Text("Default Model") },
             modifier = Modifier.fillMaxWidth()
         )
+
+        // FINISHING: Dynamic model fetch using OllamaClient.listModels() - addresses better UX for vision/text choice
+        var availableModels by remember { mutableStateOf<List<String>>(emptyList()) }
+        var isFetchingModels by remember { mutableStateOf(false) }
+
+        Row {
+            OutlinedButton(
+                onClick = {
+                    scope.launch {
+                        isFetchingModels = true
+                        val client = OllamaClient()
+                        client.updateBaseUrl(ollamaUrl)
+                        availableModels = client.listModels()
+                        isFetchingModels = false
+                    }
+                },
+                enabled = !isFetchingModels
+            ) {
+                Text(if (isFetchingModels) "Fetching..." else "Fetch models from Ollama")
+            }
+        }
+
+        if (availableModels.isNotEmpty()) {
+            Spacer(Modifier.height(8.dp))
+            Text("Available models (tap to use):", style = MaterialTheme.typography.labelSmall)
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                availableModels.forEach { m ->
+                    FilterChip(
+                        selected = model == m,
+                        onClick = { model = m },
+                        label = { Text(m) }
+                    )
+                }
+            }
+            Spacer(Modifier.height(8.dp))
+        }
 
         Spacer(Modifier.height(16.dp))
 

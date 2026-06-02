@@ -150,53 +150,85 @@ class WhatsAppAccessibilityService : AccessibilityService() {
     /**
      * Attempts to paste the given text into WhatsApp's message input field.
      * This is best-effort and can break if WhatsApp changes their UI.
+     * FINISHING PASS: Expanded ID lists heavily + extra focus/paste actions + more send heuristics.
      */
     fun pasteTextIntoWhatsApp(text: String): Boolean {
         val root = rootInActiveWindow ?: return false
 
-        // Common + newer IDs for WhatsApp's message input field
+        // Comprehensive list of WhatsApp input field IDs across versions (including beta, business, older)
         val inputIds = listOf(
             "com.whatsapp:id/entry",
             "com.whatsapp:id/conversation_entry",
             "com.whatsapp:id/message_input",
-            "com.whatsapp:id/input"
+            "com.whatsapp:id/input",
+            "com.whatsapp:id/conversation_text_entry",
+            "com.whatsapp:id/message_input_edit_text",
+            "com.whatsapp:id/ib_message_input",
+            "com.whatsapp:id/entry_field",
+            "com.whatsapp:id/input_text"
         )
 
+        var pasted = false
         for (id in inputIds) {
             val nodes = root.findAccessibilityNodeInfosByViewId(id)
             for (node in nodes) {
-                if (node.isEditable) {
-                    // Try to focus first (helps in some versions)
+                if (node.isEditable || node.className?.contains("EditText", ignoreCase = true) == true) {
+                    // Multiple focus attempts
+                    node.performAction(AccessibilityNodeInfo.ACTION_FOCUS)
                     node.performAction(AccessibilityNodeInfo.ACTION_FOCUS)
 
+                    // Set text directly (most reliable)
                     val arguments = android.os.Bundle().apply {
                         putCharSequence(
                             android.view.accessibility.AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE,
                             text
                         )
                     }
-                    val success = node.performAction(
+                    var success = node.performAction(
                         android.view.accessibility.AccessibilityNodeInfo.ACTION_SET_TEXT,
                         arguments
                     )
+
+                    // Fallback: try paste action (some versions respond better)
+                    if (!success) {
+                        val pasteBundle = android.os.Bundle().apply {
+                            putCharSequence(
+                                android.view.accessibility.AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE,
+                                text
+                            )
+                        }
+                        success = node.performAction(AccessibilityNodeInfo.ACTION_PASTE, pasteBundle)
+                    }
+
                     if (success) {
-                        // Best-effort: try to find and click the send button
                         tryClickSendButton(root)
-                        return true
+                        pasted = true
+                        break
                     }
                 }
             }
+            if (pasted) break
         }
-        return false
+
+        if (!pasted) {
+            // Last resort: ensure it's in clipboard so user can long-press paste easily
+            // (Floating service already handles main clipboard fallback)
+        }
+
+        return pasted
     }
 
     private fun tryClickSendButton(root: AccessibilityNodeInfo) {
-        // Common send button IDs in WhatsApp (updated for more versions)
+        // Comprehensive send button IDs across WhatsApp versions (finishing pass)
         val sendIds = listOf(
             "com.whatsapp:id/send",
             "com.whatsapp:id/voice_note_send_button",
             "com.whatsapp:id/send_button",
-            "com.whatsapp:id/conversation_send_button"
+            "com.whatsapp:id/conversation_send_button",
+            "com.whatsapp:id/ib_send",
+            "com.whatsapp:id/send_image_btn",
+            "com.whatsapp:id/button_send",
+            "com.whatsapp:id/fab_send"
         )
 
         for (id in sendIds) {
@@ -227,4 +259,9 @@ class WhatsAppAccessibilityService : AccessibilityService() {
     }
 
     // AUTONOMOUS IMPROVEMENT (Odd loops): Added more defensive null checks and broader ID list for future WhatsApp versions.
+
+    companion object {
+        var instance: WhatsAppAccessibilityService? = null
+            private set
+    }
 }

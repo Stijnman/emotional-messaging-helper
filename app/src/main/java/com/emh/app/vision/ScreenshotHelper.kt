@@ -15,7 +15,7 @@ import java.io.ByteArrayOutputStream
  *
  * NOTE: The actual screen capture is performed by ScreenCaptureService using
  * MediaProjection (started via MainActivity + ScreenCaptureManager).
- * The result is stored in ScreenCaptureService.LastScreenshot.base64 and
+ * The result is stored in ScreenCaptureService.lastScreenshotBase64 and
  * consumed by EmotionalPanel.
  *
  * This object now only contains the JPEG base64 conversion helpers used
@@ -27,7 +27,7 @@ object ScreenshotHelper {
      * @deprecated Real capture uses MediaProjection in ScreenCaptureService.
      * This always returned null and is kept only for backward compatibility.
      */
-    @Deprecated("Use ScreenCaptureService + LastScreenshot instead", ReplaceWith("null"))
+    @Deprecated("Use ScreenCaptureService + lastScreenshotBase64 instead", ReplaceWith("null"))
     suspend fun captureScreen(context: Context): ImageBitmap? = withContext(Dispatchers.IO) {
         null
     }

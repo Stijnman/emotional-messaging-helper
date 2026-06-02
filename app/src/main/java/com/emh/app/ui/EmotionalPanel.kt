@@ -45,7 +45,7 @@ fun EmotionalPanel(
     var lastContact by remember { mutableStateOf(contactKey) }
     LaunchedEffect(contactKey) {
         if (contactKey != lastContact) {
-            com.emh.app.vision.ScreenCaptureService.LastScreenshot.base64 = null
+            com.emh.app.vision.ScreenCaptureService.lastScreenshotBase64 = null
             visionAttached = false
             lastContact = contactKey
         }
@@ -76,7 +76,7 @@ fun EmotionalPanel(
     LaunchedEffect(Unit) {
         while (true) {
             kotlinx.coroutines.delay(800)
-            visionAttached = com.emh.app.vision.ScreenCaptureService.LastScreenshot.base64 != null
+            visionAttached = com.emh.app.vision.ScreenCaptureService.lastScreenshotBase64 != null
         }
     }
 
@@ -162,7 +162,7 @@ fun EmotionalPanel(
                             modifier = Modifier.weight(1f)
                         )
                         TextButton(onClick = {
-                            com.emh.app.vision.ScreenCaptureService.LastScreenshot.base64 = null
+                            com.emh.app.vision.ScreenCaptureService.lastScreenshotBase64 = null
                             visionAttached = false
                             haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                         }) {
@@ -205,7 +205,7 @@ fun EmotionalPanel(
                         else -> "Crafting emotionally intelligent reply..."
                     }
                     scope.launch {
-                        val imageBase64 = com.emh.app.vision.ScreenCaptureService.LastScreenshot.base64
+                        val imageBase64 = com.emh.app.vision.ScreenCaptureService.lastScreenshotBase64
 
                         val prompt = promptEngine.buildPrompt(
                             contactKey = contactKey,
@@ -235,7 +235,7 @@ fun EmotionalPanel(
                             emotionalInsight = parsed.emotionalInsight
                             statusMessage = ""
                             // Clear the used screenshot
-                            com.emh.app.vision.ScreenCaptureService.LastScreenshot.base64 = null
+                            com.emh.app.vision.ScreenCaptureService.lastScreenshotBase64 = null
                             visionAttached = false
                         }.onFailure { error ->
                             emotionalInsight = when {
@@ -315,22 +315,40 @@ fun EmotionalPanel(
                     Text("Speak")
                 }
 
+                // FINISHING: Explicit manual "Paste Reply" button to satisfy auto-paste reliability issues (#2, #6).
+                // Triggers accessibility direct paste (best effort) + always ensures clipboard fallback.
                 Button(onClick = {
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                     AutoPasteHelper.copyToClipboard(context, suggestedReply)
                     onSendToWhatsApp(suggestedReply)
                 }) {
-                    Text("Send to WhatsApp")
+                    Text("Paste Reply")
+                }
+            }
+
+            // Extra manual trigger row for when direct paste is flaky (addresses GitHub issues)
+            if (suggestedReply.isNotBlank()) {
+                Spacer(Modifier.height(8.dp))
+                OutlinedButton(
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        AutoPasteHelper.copyToClipboard(context, suggestedReply)
+                        // Force the callback again for users who want to retry paste
+                        onSendToWhatsApp(suggestedReply)
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Try Direct Paste Again (or use clipboard)")
                 }
             }
         }
 
         Spacer(Modifier.height(20.dp))
 
-        TemplateGallery { template ->
+        TemplateGallery(onTemplateSelected = { template ->
             suggestedReply = template
             emotionalInsight = "Using a quick template for a sincere response."
-        }
+        })
 
         Spacer(Modifier.height(16.dp))
 

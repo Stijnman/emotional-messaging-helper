@@ -17,7 +17,7 @@ The app has been developed fully autonomously across 20+ improvement loops (odd 
 
 After extensive autonomous development (including 20+ systematic improvement loops across **all files** + dedicated testing phase with continuous fixes), the app is being iteratively hardened until it is as complete and reliable as possible.
 
-**Latest in this continue pass**: Fixed class structure bug in EmotionalPromptEngine (parseResponse now compiles), strengthened vision prompt instructions, added Ollama listModels + better healthCheck, expanded tests, CI on feature branches, cleaned legacy placeholder code, huge docs improvements for Android Studio onboarding.
+**Latest (finishing pass)**: Added manual "Paste Reply" + retry buttons (addresses #2/#6), dynamic model fetcher in Settings, more paste heuristics, expanded tests, all docs ultra clear for immediate AS open. Issues #5 (tests), #6/#2 (paste) significantly advanced in code. See #18 for device feedback tracking.
 
 ### Current Focus / Next Step
 The project is in active autonomous "test until all working completely" mode.
