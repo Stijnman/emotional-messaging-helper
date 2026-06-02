@@ -85,8 +85,6 @@ Only output valid JSON. Do not add any extra text before or after the JSON.
         """.trimIndent()
     }
 
-<<<<<<< HEAD
-=======
     /**
      * AUTONOMOUS: Dedicated method for vision cases to allow future specialization.
      */
@@ -100,7 +98,6 @@ Only output valid JSON. Do not add any extra text before or after the JSON.
         return buildPrompt(contactKey, originalMessage, visionDescription, figurativeLevel, tonePreset)
     }
 
->>>>>>> f06f07e (test+fix+polish: autonomous continue - fix EmotionalPromptEngine class (parseResponse), strengthen vision prompts, enhance Ollama health+listModels, expand tests (prompt parse, history, memory clear), CI on feature branches, touch ALL files (services, ui, memory, manifest, docs), bump version, update templates)
     fun parseResponse(rawResponse: String): EmotionalResponse {
         return try {
             // Clean up common LLM JSON formatting issues

@@ -13,13 +13,8 @@ android {
         applicationId = "com.emh.app"
         minSdk = 26
         targetSdk = 35
-<<<<<<< HEAD
-        versionCode = 1
-        versionName = "0.1.0"
-=======
         versionCode = 3
         versionName = "0.2.1" // Autonomous testing/hardening: engine fix, vision prompt, expanded tests, CI on features, all-files pass
->>>>>>> f06f07e (test+fix+polish: autonomous continue - fix EmotionalPromptEngine class (parseResponse), strengthen vision prompts, enhance Ollama health+listModels, expand tests (prompt parse, history, memory clear), CI on feature branches, touch ALL files (services, ui, memory, manifest, docs), bump version, update templates)
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
