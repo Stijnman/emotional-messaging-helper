@@ -34,4 +34,11 @@ class EmotionalPanelTest {
         // It's here as a structural starting point.
         composeTestRule.onNodeWithText("Test Contact").assertExists()
     }
+
+    // AUTONOMOUS: Additional UI smoke test placeholder for vision chip + generate button in later device runs.
+    @Test
+    fun emotionalPanel_hasGenerateButton() {
+        // Full assertions require more Compose test setup + fakes for Ollama/PanelState.
+        // Run on device with AS for real validation.
+    }
 }

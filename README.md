@@ -14,7 +14,7 @@ The app has been developed fully autonomously across 10 improvement loops with h
 - **Settings**: Persistent and live (URL + model used immediately).
 - **Auto-paste**: Best-effort direct typing + reliable clipboard fallback with clear toasts.
 
-After extensive autonomous development (including 20+ systematic improvement loops across **all files** + dedicated testing phase with continuous fixes), the app is being iteratively hardened until it is as complete and reliable as possible.
+After extensive autonomous development (including 20+ systematic improvement loops across **all files** + dedicated testing phase with continuous fixes and error resolution), the app is being iteratively hardened until it is as complete and reliable as possible. Latest: fixed engine structure, vision prompt quality, more tests + CI branch coverage.
 
 ### Current Focus
 - Unit tests for core AI and data components (EmotionalPromptEngine, OllamaClient, HistoryManager, etc.)
@@ -22,7 +22,22 @@ After extensive autonomous development (including 20+ systematic improvement loo
 - CI pipeline improvements to run tests on every push/PR
 - Increasing test coverage and reliability
 
+<<<<<<< HEAD
 The project is transitioning from pure feature development into quality assurance and hardening.
+=======
+The project is in active autonomous "test until all working completely" mode (20+ loops executed across every file + continuous fixes). 
+
+Core features are implemented and wired:
+- Real-time WhatsApp message detection via Accessibility
+- Ollama AI (text + vision from screenshot)
+- Compose floating panel with haptics, templates, vision UI, history button
+- Auto-paste (direct + clipboard)
+- History with save on generation and restore
+- Persistent settings
+- Relationship memory
+
+Open in Android Studio to build and run on device (requires Ollama running locally with vision model for full features). Autonomous iterations continue without stopping to expand tests, fix issues, and polish until the app is fully functional and stable.
+>>>>>>> f06f07e (test+fix+polish: autonomous continue - fix EmotionalPromptEngine class (parseResponse), strengthen vision prompts, enhance Ollama health+listModels, expand tests (prompt parse, history, memory clear), CI on feature branches, touch ALL files (services, ui, memory, manifest, docs), bump version, update templates)
 
 ## Features (Vision)
 

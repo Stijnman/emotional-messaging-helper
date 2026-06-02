@@ -1,4 +1,5 @@
 version: 2
+# Dependabot for Gradle + Actions. Works with the dependency-graph in CI.
 updates:
   - package-ecosystem: "gradle"
     directory: "/"

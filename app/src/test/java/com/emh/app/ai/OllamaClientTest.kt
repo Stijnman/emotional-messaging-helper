@@ -27,4 +27,10 @@ class OllamaClientTest {
         assertEquals("llava", OllamaClient.suggestVisionModelIfNeeded("mistral"))
         assertEquals("llava-llama3", OllamaClient.suggestVisionModelIfNeeded("llava-llama3"))
     }
+
+    @Test
+    fun `RECOMMENDED_VISION_MODELS contains expected entries`() {
+        assertTrue(OllamaClient.RECOMMENDED_VISION_MODELS.contains("llava"))
+        assertTrue(OllamaClient.RECOMMENDED_VISION_MODELS.any { it.contains("llava") })
+    }
 }

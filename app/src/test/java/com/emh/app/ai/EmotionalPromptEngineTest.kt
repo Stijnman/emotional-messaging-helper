@@ -112,4 +112,26 @@ class EmotionalPromptEngineTest {
         assertTrue(lowFig.contains("very direct") || lowFig.contains("literal"))
         assertTrue(highFig.contains("expressive") || highFig.contains("poetic") || highFig.contains("intensity"))
     }
+
+    @Test
+    fun `parseResponse handles JSON with extra whitespace and code fences`() {
+        val fenced = """
+            ```json
+            {
+              "suggestedReply": "Test reply here",
+              "emotionalInsight": "Insight text",
+              "recommendedTone": "playful"
+            }
+            ```
+        """.trimIndent()
+        val result = promptEngine.parseResponse(fenced)
+        assertTrue(result.suggestedReply.contains("Test reply"))
+    }
+
+    @Test
+    fun `buildVisionPrompt delegates and includes vision markers`() {
+        val prompt = promptEngine.buildVisionPrompt("c", "hi", "photo of smile")
+        assertTrue(prompt.contains("VISUAL CONTEXT") || prompt.contains("screenshot"))
+        assertTrue(prompt.contains("photo of smile"))
+    }
 }

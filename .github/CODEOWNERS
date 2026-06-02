@@ -1,4 +1,5 @@
 # Code owners for Emotional Messaging Helper
 # Even as a solo project, this helps with future collaboration and review reminders
+# Autonomous improvements continue to land on main via tested branches
 
 *       @Stijnman

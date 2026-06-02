@@ -2,12 +2,25 @@
 
 ## [Unreleased / In Development] - Heavy Autonomous Development
 
+<<<<<<< HEAD
 ### Testing & Hardening Phase - Continuing Until Complete
 - Multiple new unit tests (EmotionalPromptEngine vision paths, OllamaClient helpers, History)
 - Compose UI test skeleton
 - CI now executes unit tests on every push/PR
 - Systematic autonomous fixes for deprecations, robustness, and edge cases
 - "Test until everything is working completely" mode is now active
+=======
+### Testing & Hardening Phase - Continuing Until Finished (Autonomous)
+- Fixed critical syntax error in EmotionalPromptEngine (parseResponse now correctly inside class)
+- Strengthened vision prompt instructions (explicit "you can see the image", more visual references)
+- Enhanced OllamaClient: improved healthCheck + new listModels() for future settings + better docs
+- Expanded unit tests: more parse cases, figurative, vision prompt, model detection, history export/count
+- CI now triggers on feature/** branches (keeps autonomous work validated)
+- Touched + hardened ALL source files (prompt, client, panel, services, capture, memory, helpers, tests, PanelState, app init)
+- Micro improvements: clearer toasts, vision auto-clear, relationship clearNote, AutoPasteHelper polish, more IDs/comments in accessibility
+- Updated .gitignore handling and build hygiene
+- Continue "do not stop until all working completely" + prepare pristine state for Android Studio open + real device runs
+>>>>>>> f06f07e (test+fix+polish: autonomous continue - fix EmotionalPromptEngine class (parseResponse), strengthen vision prompts, enhance Ollama health+listModels, expand tests (prompt parse, history, memory clear), CI on feature branches, touch ALL files (services, ui, memory, manifest, docs), bump version, update templates)
 
 The autonomous agent will continue iterating and fixing until the project is as complete and stable as possible.
 

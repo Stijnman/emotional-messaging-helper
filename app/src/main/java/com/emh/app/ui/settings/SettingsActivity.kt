@@ -20,3 +20,4 @@ class SettingsActivity : ComponentActivity() {
 
 // Note: The real polished SettingsScreen composable lives in SettingsScreen.kt
 // and is the one used here. The old duplicate was removed during autonomous cleanup.
+// Settings changes are observed live by the floating panel.

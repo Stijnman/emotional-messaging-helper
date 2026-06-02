@@ -19,7 +19,7 @@ gradle wrapper --gradle-version 8.9
 ./gradlew assembleDebug
 ```
 
-The `gradlew` script has been improved with better guidance for this autonomously-built project.
+The `gradlew` script has been improved with better guidance for this autonomously-built project. (Continue autonomous fixes applied - engine, tests, CI, vision quality, all files touched).
 
 ## 3. Required Permissions (on device)
 - **Display over other apps** (Overlay)

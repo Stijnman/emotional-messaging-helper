@@ -37,14 +37,15 @@ class EmotionalPromptEngine(
             IMPORTANT - VISUAL CONTEXT (Screenshot provided):
             A screenshot of the WhatsApp conversation was captured right before this request.
             Pay close attention to:
-            - Emotional tone visible in the chat (emojis, capitalization, message length, punctuation)
+            - Emotional tone visible in the chat (emojis, capitalization, message length, punctuation, reply timing)
+            - Facial expressions, body language or scene details if people/photos visible
             - Any images, memes, or shared media visible in the screenshot
             - Timing and conversation flow
             $visionDescription
 
-            Reference specific visual elements in the emotional insight when relevant. Make the suggested reply feel like it belongs in this exact visual conversation.
+            Reference specific visual elements (e.g. "the laughing emoji" or "the photo of the beach") in the emotional insight when relevant. Make the suggested reply feel like it belongs in this exact visual conversation.
 
-            The user has also attached the actual screenshot image for your direct analysis. Use the visual details from the image (not just the text description) to craft a more accurate and emotionally resonant reply.
+            The user has also attached the actual screenshot image for your direct analysis. Use the visual details from the image (not just the text description) to craft a more accurate and emotionally resonant reply and insight. You can "see" the image.
 
             // AUTONOMOUS IMPROVEMENT: When vision is provided, prioritize emotional signals visible in the image and analyze text + visual content together.
             """.trimIndent()
@@ -84,6 +85,22 @@ Only output valid JSON. Do not add any extra text before or after the JSON.
         """.trimIndent()
     }
 
+<<<<<<< HEAD
+=======
+    /**
+     * AUTONOMOUS: Dedicated method for vision cases to allow future specialization.
+     */
+    fun buildVisionPrompt(
+        contactKey: String,
+        originalMessage: String,
+        visionDescription: String?,
+        figurativeLevel: Int = 5,
+        tonePreset: String? = null
+    ): String {
+        return buildPrompt(contactKey, originalMessage, visionDescription, figurativeLevel, tonePreset)
+    }
+
+>>>>>>> f06f07e (test+fix+polish: autonomous continue - fix EmotionalPromptEngine class (parseResponse), strengthen vision prompts, enhance Ollama health+listModels, expand tests (prompt parse, history, memory clear), CI on feature branches, touch ALL files (services, ui, memory, manifest, docs), bump version, update templates)
     fun parseResponse(rawResponse: String): EmotionalResponse {
         return try {
             // Clean up common LLM JSON formatting issues

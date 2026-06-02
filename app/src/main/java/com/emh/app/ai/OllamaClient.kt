@@ -117,11 +117,48 @@ class OllamaClient(
     }
 
     /**
-     * TEST (Loop 2+): Added for autonomous verification.
-     * Returns true if both text and vision endpoints respond reasonably.
+     * AUTONOMOUS IMPROVEMENT (testing phase): More thorough health check.
+     * Pings /api/tags and verifies basic responsiveness. Useful for panel "Check Ollama".
      */
-    suspend fun healthCheck(): Boolean {
-        return isAvailable() // Can be expanded in future loops
+    suspend fun healthCheck(): Boolean = withContext(Dispatchers.IO) {
+        try {
+            val tagsRequest = Request.Builder()
+                .url("$baseUrl/api/tags")
+                .get()
+                .build()
+            client.newCall(tagsRequest).execute().use { resp ->
+                if (!resp.isSuccessful) return@withContext false
+                // Optional: could parse models list but for health just success is enough
+                true
+            }
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    /**
+     * Lists available models from Ollama (for settings UI and auto-suggest).
+     */
+    suspend fun listModels(): List<String> = withContext(Dispatchers.IO) {
+        try {
+            val request = Request.Builder()
+                .url("$baseUrl/api/tags")
+                .get()
+                .build()
+            client.newCall(request).execute().use { response ->
+                if (!response.isSuccessful) return@withContext emptyList()
+                val body = response.body?.string() ?: return@withContext emptyList()
+                // Minimal parse: look for model names
+                val names = mutableListOf<String>()
+                val regex = """"name"\s*:\s*"([^"]+)"""".toRegex()
+                regex.findAll(body).forEach { m ->
+                    names.add(m.groupValues[1])
+                }
+                names
+            }
+        } catch (e: Exception) {
+            emptyList()
+        }
     }
 
     /**

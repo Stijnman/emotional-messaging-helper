@@ -14,8 +14,9 @@ Please delete options that are not relevant.
 ## How Has This Been Tested?
 Please describe the tests that you ran to verify your changes.
 
-- [ ] Manual testing on physical device
-- [ ] Unit tests added/updated
+- [ ] Manual testing on physical device + real Ollama (llava for vision)
+- [ ] Unit tests added/updated (EmotionalPromptEngine, OllamaClient, History etc)
+- [ ] CI (testDebugUnitTest) passes via GitHub Actions
 - [ ] UI tested with TalkBack / accessibility
 
 ## Checklist:

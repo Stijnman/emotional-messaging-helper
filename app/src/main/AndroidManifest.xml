@@ -11,6 +11,7 @@
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
+    <!-- Media projection for vision screenshots (declared via foregroundServiceType on service) -->
 
     <application
         android:name=".EMHApplication"
@@ -34,7 +35,7 @@
             </intent-filter>
         </activity>
 
-        <!-- Accessibility Service for WhatsApp message detection -->
+        <!-- Accessibility Service for WhatsApp message detection + direct paste via ACTION_SET_TEXT -->
         <service
             android:name=".service.WhatsAppAccessibilityService"
             android:exported="false"

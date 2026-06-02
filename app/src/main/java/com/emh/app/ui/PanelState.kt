@@ -7,4 +7,9 @@ import com.emh.app.history.HistoryEntry
  */
 object PanelState {
     var onRestoreRequest: ((HistoryEntry) -> Unit)? = null
+
+    // AUTONOMOUS: Reset for clean panel state between sessions (used on close)
+    fun clearRestoreHandler() {
+        onRestoreRequest = null
+    }
 }
