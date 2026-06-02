@@ -27,12 +27,13 @@ class FloatingOverlayService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val contact = intent?.getStringExtra(EXTRA_CONTACT) ?: "Contact"
         val message = intent?.getStringExtra(EXTRA_MESSAGE) ?: ""
+        val suggestVision = intent?.getBooleanExtra(EXTRA_SUGGEST_VISION, false) ?: false
 
-        showFloatingPanel(contact, message)
+        showFloatingPanel(contact, message, suggestVision)
         return START_NOT_STICKY
     }
 
-    private fun showFloatingPanel(contactKey: String, originalMessage: String) {
+    private fun showFloatingPanel(contactKey: String, originalMessage: String, suggestVision: Boolean = false) {
         floatingView?.let {
             windowManager.removeView(it)
             floatingView = null
@@ -54,7 +55,8 @@ class FloatingOverlayService : Service() {
                             android.widget.Toast.makeText(this@FloatingOverlayService, "Copied to clipboard (paste manually)", android.widget.Toast.LENGTH_SHORT).show()
                         }
                         // AUTONOMOUS IMPROVEMENT (Loop 1+): Added explicit feedback for better user experience in all paste paths.
-                    }
+                    },
+                    suggestVision = suggestVision
                 )
             }
         }
@@ -94,11 +96,13 @@ class FloatingOverlayService : Service() {
     companion object {
         const val EXTRA_CONTACT = "extra_contact"
         const val EXTRA_MESSAGE = "extra_message"
+        const val EXTRA_SUGGEST_VISION = "extra_suggest_vision"
 
-        fun showForMessage(context: Context, contactKey: String, message: String) {
+        fun showForMessage(context: Context, contactKey: String, message: String, suggestVision: Boolean = false) {
             val intent = Intent(context, FloatingOverlayService::class.java).apply {
                 putExtra(EXTRA_CONTACT, contactKey)
                 putExtra(EXTRA_MESSAGE, message)
+                putExtra(EXTRA_SUGGEST_VISION, suggestVision)
             }
             context.startService(intent)
         }

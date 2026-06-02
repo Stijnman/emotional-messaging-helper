@@ -2,14 +2,18 @@
 
 ## [Unreleased / In Development] - Heavy Autonomous Development
 
-### Testing & Hardening Phase - Continuing Until Complete
-- Multiple new unit tests (EmotionalPromptEngine vision paths, OllamaClient helpers, History)
-- Compose UI test skeleton
-- CI now executes unit tests on every push/PR
-- Systematic autonomous fixes for deprecations, robustness, and edge cases
-- "Test until everything is working completely" mode is now active
+### Testing & Hardening Phase - Continuing Until Finished (Autonomous)
+- History saving wired in EmotionalPanel after every generation (visionUsed flag supported)
+- HistoryScreen and restore handle/display visionUsed correctly
+- "History" button added directly in floating panel
+- More tests: OllamaClientTest, expanded EmotionalPromptEngineTest, etc.
+- ScreenCaptureManager modernized (deprecation isolated)
+- Auto-suggest vision model + status in panel when screenshot attached
+- "Test until all working completely" mode - will not stop iterating/fixing all files until fully functional and stable.
 
-The autonomous agent will continue iterating and fixing until the project is as complete and stable as possible.
+Autonomous development continues without pause.
+
+Will keep iterating, testing, and fixing every file until the app is fully working and stable.
 
 ## [0.1.0] - Earlier Planning
 

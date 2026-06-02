@@ -84,6 +84,20 @@ Only output valid JSON. Do not add any extra text before or after the JSON.
         """.trimIndent()
     }
 
+    /**
+     * AUTONOMOUS: Dedicated method for vision cases to allow future specialization.
+     */
+    fun buildVisionPrompt(
+        contactKey: String,
+        originalMessage: String,
+        visionDescription: String?,
+        figurativeLevel: Int = 5,
+        tonePreset: String? = null
+    ): String {
+        return buildPrompt(contactKey, originalMessage, visionDescription, figurativeLevel, tonePreset)
+    }
+}
+
     fun parseResponse(rawResponse: String): EmotionalResponse {
         return try {
             // Clean up common LLM JSON formatting issues

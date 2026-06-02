@@ -1,0 +1,20 @@
+{
+    "logs": [
+        {
+            "outputFile": "com.emh.app-mergeDebugResources-71:/values-v16/values-v16.xml",
+            "map": [
+                {
+                    "source": "/home/linuxmint/.gradle/caches/8.9/transforms/35076e2f3f50374870cfb2ad107084e4/transformed/appcompat-1.7.1/res/values-v16/values-v16.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endLines": "5",
+                        "endColumns": "12",
+                        "endOffsets": "223"
+                    }
+                }
+            ]
+        }
+    ]
+}

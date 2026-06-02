@@ -57,11 +57,14 @@ class WhatsAppAccessibilityService : AccessibilityService() {
         lastContact = contactName
 
         // Trigger the emotional assistant
+        // AUTONOMOUS: For messages that may benefit from vision (short, emoji heavy, or image related), we can suggest.
+        val suggestVision = latestIncoming.length < 20 || latestIncoming.contains(Regex("[😀-🿿]")) // simple emoji check
         scope.launch {
             FloatingOverlayService.showForMessage(
                 applicationContext,
                 contactKey = contactName,
-                message = latestIncoming
+                message = latestIncoming,
+                suggestVision = suggestVision
             )
         }
     }

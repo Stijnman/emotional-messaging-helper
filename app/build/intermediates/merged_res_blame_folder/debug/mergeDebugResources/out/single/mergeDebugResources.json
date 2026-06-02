@@ -1,0 +1,30 @@
+[
+    {
+        "merged": "com.emh.app-debug-73:/mipmap-anydpi-v26_ic_launcher_round.xml.flat",
+        "source": "com.emh.app-main-75:/mipmap-anydpi-v26/ic_launcher_round.xml"
+    },
+    {
+        "merged": "com.emh.app-debug-73:/drawable_ic_launcher_foreground.xml.flat",
+        "source": "com.emh.app-main-75:/drawable/ic_launcher_foreground.xml"
+    },
+    {
+        "merged": "com.emh.app-debug-73:/drawable_panel_background.xml.flat",
+        "source": "com.emh.app-main-75:/drawable/panel_background.xml"
+    },
+    {
+        "merged": "com.emh.app-debug-73:/layout_activity_main.xml.flat",
+        "source": "com.emh.app-main-75:/layout/activity_main.xml"
+    },
+    {
+        "merged": "com.emh.app-debug-73:/xml_accessibility_service_config.xml.flat",
+        "source": "com.emh.app-main-75:/xml/accessibility_service_config.xml"
+    },
+    {
+        "merged": "com.emh.app-debug-73:/layout_floating_emotional_panel.xml.flat",
+        "source": "com.emh.app-main-75:/layout/floating_emotional_panel.xml"
+    },
+    {
+        "merged": "com.emh.app-debug-73:/mipmap-anydpi-v26_ic_launcher.xml.flat",
+        "source": "com.emh.app-main-75:/mipmap-anydpi-v26/ic_launcher.xml"
+    }
+]

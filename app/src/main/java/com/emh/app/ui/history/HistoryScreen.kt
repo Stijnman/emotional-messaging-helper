@@ -122,5 +122,13 @@ private fun HistoryEntryItem(entry: HistoryEntry, onClick: () -> Unit) {
                 overflow = TextOverflow.Ellipsis
             )
         }
+
+        if (entry.visionUsed) {
+            Text(
+                text = "📸 with vision",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
     }
 }

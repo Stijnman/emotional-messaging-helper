@@ -20,7 +20,16 @@
         android:text="Local AI assistant for WhatsApp with vision"
         android:textSize="14sp"
         android:textColor="#666666"
-        android:layout_marginBottom="32dp" />
+        android:layout_marginBottom="8dp" />
+
+    <TextView
+        android:id="@+id/versionText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="v0.2.0 - Autonomous Development"
+        android:textSize="12sp"
+        android:textColor="#888888"
+        android:layout_marginBottom="24dp" />
 
     <!-- AUTONOMOUS 20-LOOP IMPROVEMENT: Layout reviewed for clarity and accessibility. -->
 

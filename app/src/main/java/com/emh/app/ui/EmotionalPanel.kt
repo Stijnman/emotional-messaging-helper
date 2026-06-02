@@ -26,7 +26,8 @@ fun EmotionalPanel(
     contactKey: String,
     originalMessage: String,
     onClose: () -> Unit,
-    onSendToWhatsApp: (String) -> Unit = {}
+    onSendToWhatsApp: (String) -> Unit = {},
+    suggestVision: Boolean = false
 ) {
     val context = LocalContext.current
     val app = context.applicationContext as EMHApplication
@@ -51,6 +52,13 @@ fun EmotionalPanel(
         }
     }
 
+    // If the accessibility suggests vision (e.g. short or visual message), show guidance
+    LaunchedEffect(suggestVision) {
+        if (suggestVision && !visionAttached) {
+            statusMessage = "Vision recommended for this message - tap Add Vision"
+        }
+    }
+
     val scope = rememberCoroutineScope()
     val ollama = remember { OllamaClient() }
     val promptEngine = remember { EmotionalPromptEngine(app.memoryManager) }
@@ -69,6 +77,7 @@ fun EmotionalPanel(
         com.emh.app.ui.PanelState.onRestoreRequest = { entry ->
             suggestedReply = entry.suggestedReply
             emotionalInsight = entry.emotionalInsight ?: ""
+            lastUsedVision = entry.visionUsed
         }
     }
 
@@ -194,6 +203,7 @@ fun EmotionalPanel(
         }
 
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            val buttonText = if (visionAttached) "Generate with Vision" else "Generate"
             Button(
                 onClick = {
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -207,13 +217,23 @@ fun EmotionalPanel(
                     scope.launch {
                         val imageBase64 = com.emh.app.vision.ScreenCaptureService.LastScreenshot.base64
 
-                        val prompt = promptEngine.buildPrompt(
-                            contactKey = contactKey,
-                            originalMessage = originalMessage,
-                            visionDescription = if (imageBase64 != null) "A screenshot of the conversation was captured for additional visual context." else null,
-                            figurativeLevel = figurativeLevel,
-                            tonePreset = selectedTone
-                        )
+                        val prompt = if (imageBase64 != null) {
+                            promptEngine.buildVisionPrompt(
+                                contactKey = contactKey,
+                                originalMessage = originalMessage,
+                                visionDescription = "A screenshot of the conversation was captured for additional visual context.",
+                                figurativeLevel = figurativeLevel,
+                                tonePreset = selectedTone
+                            )
+                        } else {
+                            promptEngine.buildPrompt(
+                                contactKey = contactKey,
+                                originalMessage = originalMessage,
+                                visionDescription = null,
+                                figurativeLevel = figurativeLevel,
+                                tonePreset = selectedTone
+                            )
+                        }
 
                         lastUsedVision = imageBase64 != null
 
@@ -234,6 +254,23 @@ fun EmotionalPanel(
                             suggestedReply = parsed.suggestedReply
                             emotionalInsight = parsed.emotionalInsight
                             statusMessage = ""
+                            // Save to history
+                            scope.launch {
+                                val entry = com.emh.app.history.HistoryEntry(
+                                    id = java.util.UUID.randomUUID().toString(),
+                                    timestamp = System.currentTimeMillis(),
+                                    contactKey = contactKey,
+                                    originalMessage = originalMessage,
+                                    visionDescription = if (lastUsedVision) "Screenshot used" else null,
+                                    suggestedReply = parsed.suggestedReply,
+                                    emotionalInsight = parsed.emotionalInsight,
+                                    toneUsed = parsed.recommendedTone,
+                                    figurativeLevel = figurativeLevel,
+                                    wasSent = false,
+                                    visionUsed = lastUsedVision
+                                )
+                                app.historyManager.saveEntry(entry)
+                            }
                             // Clear the used screenshot
                             com.emh.app.vision.ScreenCaptureService.LastScreenshot.base64 = null
                             visionAttached = false
@@ -252,11 +289,12 @@ fun EmotionalPanel(
                 modifier = Modifier.weight(1f),
                 enabled = !isLoading
             ) {
-                Text(if (isLoading) statusMessage else "Generate")
+                Text(if (isLoading) statusMessage else buttonText)
             }
 
             OutlinedButton(
                 onClick = {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                     // Request screen capture permission (handled by MainActivity or a dedicated activity)
                     val intent = Intent(context, com.emh.app.MainActivity::class.java).apply {
                         action = "REQUEST_SCREEN_CAPTURE"
@@ -266,7 +304,7 @@ fun EmotionalPanel(
                 },
                 modifier = Modifier.weight(1f)
             ) {
-                Text("Add Vision")
+                Text(if (visionAttached) "Recapture Vision" else "Add Vision")
             }
         }
 
@@ -346,6 +384,17 @@ fun EmotionalPanel(
                 modifier = Modifier.weight(1f)
             ) {
                 Text("Check Ollama")
+            }
+
+            OutlinedButton(
+                onClick = {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    val intent = android.content.Intent(context, com.emh.app.ui.history.HistoryActivity::class.java)
+                    context.startActivity(intent)
+                },
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("History")
             }
 
             OutlinedButton(onClick = {

@@ -59,6 +59,7 @@ class MainActivity : ComponentActivity() {
         checkPermissions()
 
         // AUTONOMOUS IMPROVEMENT + TEST (20-loop cycle): Screen capture request path hardened.
+        findViewById<TextView>(R.id.versionText)?.text = "v0.2.0 - Autonomous Testing Phase"
     }
 
     private fun requestScreenCapture() {

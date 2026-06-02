@@ -18,6 +18,7 @@ fun SettingsScreen() {
     var ollamaUrl by remember { mutableStateOf("http://localhost:11434") }
     var model by remember { mutableStateOf("llama3.2") }
     var autoAnalyze by remember { mutableStateOf(true) }
+    var connectionStatus by remember { mutableStateOf("") }
 
     val scope = rememberCoroutineScope()
 
@@ -77,6 +78,22 @@ fun SettingsScreen() {
             }
         }) {
             Text("Save Settings")
+        }
+
+        Spacer(Modifier.height(8.dp))
+
+        OutlinedButton(onClick = {
+            scope.launch {
+                val client = com.emh.app.ai.OllamaClient(ollamaUrl)
+                val ok = client.isAvailable()
+                connectionStatus = if (ok) "Connected ✓" else "Not reachable"
+            }
+        }) {
+            Text("Test Connection")
+        }
+
+        if (connectionStatus.isNotBlank()) {
+            Text(connectionStatus, style = MaterialTheme.typography.bodySmall)
         }
 
         Spacer(Modifier.height(16.dp))

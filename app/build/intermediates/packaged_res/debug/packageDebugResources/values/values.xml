@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="ic_launcher_background">#1E88E5</color>
+    <string name="accessibility_permission_needed">Please enable the Accessibility Service for WhatsApp message detection.</string>
+    <string name="app_name">EMH - Emotional Messaging Helper</string>
+    <string name="overlay_permission_needed">Overlay permission is required for the floating assistant.</string>
+    <string name="service_running">EMH is listening for WhatsApp messages</string>
+    <style name="Theme.EMH" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+    </style>
+</resources>
