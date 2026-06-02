@@ -11,7 +11,8 @@ val QUICK_TEMPLATES = listOf(
     "That makes a lot of sense. Tell me more about how you're feeling.",
     "I've been thinking about this too. Can we talk about it properly soon?",
     "Thank you for being honest with me. It means a lot.",
-    "I'm here. You don't have to go through this alone."
+    "I'm here. You don't have to go through this alone.",
+    "This matters to me too. Let's figure it out together."
 )
 
 @Composable

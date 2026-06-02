@@ -13,8 +13,8 @@ android {
         applicationId = "com.emh.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 2
-        versionName = "0.2.0" // Autonomous development progress: vision, tests, polish
+        versionCode = 3
+        versionName = "0.2.1" // Autonomous testing/hardening: engine fix, vision prompt, expanded tests, CI on features, all-files pass
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

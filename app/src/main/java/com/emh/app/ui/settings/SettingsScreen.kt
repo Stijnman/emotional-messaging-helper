@@ -29,6 +29,8 @@ fun SettingsScreen() {
     LaunchedEffect(Unit) {
         repo.defaultModel.collect { model = it }
     }
+    // AUTONOMOUS: Settings are live - panel observes via LaunchedEffect in EmotionalPanel for instant use
+    }
     LaunchedEffect(Unit) {
         repo.autoAnalyze.collect { autoAnalyze = it }
     }

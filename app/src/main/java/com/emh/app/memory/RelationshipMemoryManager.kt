@@ -58,4 +58,8 @@ class RelationshipMemoryManager(context: Context) {
         val noteLength = getNote(contactKey).length
         return (noteLength / 50).coerceAtMost(10)
     }
+
+    fun clearNote(contactKey: String) {
+        prefs.edit().remove("note_$contactKey").apply()
+    }
 }

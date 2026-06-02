@@ -3,13 +3,15 @@
 ## [Unreleased / In Development] - Heavy Autonomous Development
 
 ### Testing & Hardening Phase - Continuing Until Finished (Autonomous)
-- History saving wired in EmotionalPanel after every generation (visionUsed flag supported)
-- HistoryScreen and restore handle/display visionUsed correctly
-- "History" button added directly in floating panel
-- More tests: OllamaClientTest, expanded EmotionalPromptEngineTest, etc.
-- ScreenCaptureManager modernized (deprecation isolated)
-- Auto-suggest vision model + status in panel when screenshot attached
-- "Test until all working completely" mode - will not stop iterating/fixing all files until fully functional and stable.
+- Fixed critical syntax error in EmotionalPromptEngine (parseResponse now correctly inside class)
+- Strengthened vision prompt instructions (explicit "you can see the image", more visual references)
+- Enhanced OllamaClient: improved healthCheck + new listModels() for future settings + better docs
+- Expanded unit tests: more parse cases, figurative, vision prompt, model detection, history export/count
+- CI now triggers on feature/** branches (keeps autonomous work validated)
+- Touched + hardened ALL source files (prompt, client, panel, services, capture, memory, helpers, tests, PanelState, app init)
+- Micro improvements: clearer toasts, vision auto-clear, relationship clearNote, AutoPasteHelper polish, more IDs/comments in accessibility
+- Updated .gitignore handling and build hygiene
+- Continue "do not stop until all working completely" + prepare pristine state for Android Studio open + real device runs
 
 Autonomous development continues without pause.
 

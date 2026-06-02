@@ -124,6 +124,7 @@ class ScreenCaptureService : Service() {
                 ).show()
 
                 // AUTONOMOUS LOOP IMPROVEMENT: Added explicit success notification for better user feedback in vision flows.
+                // Image is JPEG compressed in ScreenshotHelper for faster Ollama vision roundtrips.
 
                 image.close()
                 stopSelf()

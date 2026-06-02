@@ -54,4 +54,11 @@ class RelationshipMemoryManagerTest {
         val strength = manager.getRelationshipStrength("test-contact")
         assertEquals(2, strength)
     }
+
+    @Test
+    fun `clearNote removes stored note`() {
+        manager.saveNote("test-contact", "temp")
+        manager.clearNote("test-contact")
+        assertEquals("", manager.getNote("test-contact"))
+    }
 }

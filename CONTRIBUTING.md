@@ -18,6 +18,8 @@ Thank you for your interest in contributing to Emotional Messaging Helper!
 
 ## Pull Request Process
 
+Autonomous development is active; major changes go through feature branches + PRs (see GitHub actions for CI/tests on pushes).
+
 1. Create a new branch from `main` for your feature/fix
 2. Make your changes
 3. Update documentation if needed

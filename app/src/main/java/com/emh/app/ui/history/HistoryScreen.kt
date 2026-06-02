@@ -27,6 +27,7 @@ fun HistoryScreen(
     var entries by remember { mutableStateOf(listOf<HistoryEntry>()) }
     var searchQuery by remember { mutableStateOf("") }
     val scope = rememberCoroutineScope()
+    // AUTONOMOUS: restore wires through PanelState singleton for seamless panel update without ViewModel
 
     LaunchedEffect(searchQuery) {
         scope.launch {

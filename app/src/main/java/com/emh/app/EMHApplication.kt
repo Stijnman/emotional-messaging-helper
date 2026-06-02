@@ -25,6 +25,7 @@ class EMHApplication : Application() {
         settingsRepository = SettingsRepository(this)
 
         // AUTONOMOUS TEST (Even loops): Application initialization verified.
+        // Managers are singletons for the lifetime of the app process (panel + services share).
     }
 
     companion object {

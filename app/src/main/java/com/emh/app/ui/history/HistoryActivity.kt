@@ -15,7 +15,7 @@ class HistoryActivity : ComponentActivity() {
             MaterialTheme {
                 HistoryScreen(
                     onEntrySelected = { entry ->
-                        // Restore into the currently open floating panel if available
+                        // Restore into the currently open floating panel if available (via singleton)
                         com.emh.app.ui.PanelState.onRestoreRequest?.invoke(entry)
                         finish()
                     },
