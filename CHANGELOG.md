@@ -2,14 +2,6 @@
 
 ## [Unreleased / In Development] - Heavy Autonomous Development
 
-<<<<<<< HEAD
-### Testing & Hardening Phase - Continuing Until Complete
-- Multiple new unit tests (EmotionalPromptEngine vision paths, OllamaClient helpers, History)
-- Compose UI test skeleton
-- CI now executes unit tests on every push/PR
-- Systematic autonomous fixes for deprecations, robustness, and edge cases
-- "Test until everything is working completely" mode is now active
-=======
 ### Testing & Hardening Phase - Continuing Until Finished (Autonomous)
 - Fixed critical syntax error in EmotionalPromptEngine (parseResponse now correctly inside class)
 - Strengthened vision prompt instructions (explicit "you can see the image", more visual references)
@@ -24,7 +16,6 @@
 - Cleaned legacy placeholder code in ScreenshotHelper (now clearly points to real MediaProjection path)
 - Expanded test placeholders + comments
 - Continue "do not stop until all working completely" + prepare pristine state for Android Studio open + real device runs. This pass was driven by "whats the next step" – focus on user being able to open/build immediately.
->>>>>>> f06f07e (test+fix+polish: autonomous continue - fix EmotionalPromptEngine class (parseResponse), strengthen vision prompts, enhance Ollama health+listModels, expand tests (prompt parse, history, memory clear), CI on feature branches, touch ALL files (services, ui, memory, manifest, docs), bump version, update templates)
 
 The autonomous agent will continue iterating and fixing until the project is as complete and stable as possible.
 
