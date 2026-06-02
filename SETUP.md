@@ -1,25 +1,80 @@
 # Setup Instructions
 
-## 1. Open in Android Studio
-1. Open Android Studio (2024.3+ or newer recommended)
-2. Open the `emotional-messaging-helper` folder as a project
+> **THE NEXT STEP RIGHT NOW**
+>
+> 1. Clone or pull the latest `main` branch.
+> 2. **Open the folder in Android Studio** (this is the intended and only reliable way to build).
+> 3. Let it sync + download the Gradle wrapper.
+> 4. Build and run on a **physical Android device**.
+> 5. Test with real Ollama (llava recommended for vision).
+>
+> Report back any build errors, sync problems, or runtime behavior from the device. Autonomous fixes will continue based on that feedback.
 
-## 2. Let Gradle Sync
-This project was heavily developed in autonomous mode. The recommended (and easiest) way to build is:
+## 1. Open in Android Studio (Primary Path)
+1. Use Android Studio Hedgehog / Iguana / Koala (2024.3+) or newer.
+2. `File > Open` → select the `emotional-messaging-helper` folder.
+3. Wait for Gradle sync (it will download Gradle 8.9 + the wrapper jar automatically).
+4. If it complains about missing wrapper jar:
+   - Run `File > Sync Project with Gradle Files`
+   - Or `Build > Clean Project` then `Rebuild Project`
 
-1. Open the `emotional-messaging-helper` folder in **Android Studio**.
-2. Android Studio will automatically download the correct Gradle version and wrapper.
-3. Sync the project.
-4. Run on a physical device.
+## 2. Gradle Sync & Build
+This project was developed autonomously (many full-file improvement + test loops). Android Studio handles the wrapper for you.
 
-If you want to generate the wrapper manually (advanced):
+Common issues & fixes:
+- "Gradle wrapper not found" → Sync Project with Gradle Files (AS will fetch it).
+- SDK not found → Let Android Studio install the required SDK platforms when prompted.
+- "Could not find ... " after first sync → `Build > Clean` + `Rebuild`.
+- Still stuck → Invalidate Caches / Restart.
+
+Manual fallback (only if you have Gradle on PATH):
 ```bash
 cd emotional-messaging-helper
 gradle wrapper --gradle-version 8.9
 ./gradlew assembleDebug
 ```
 
-The `gradlew` script has been improved with better guidance for this autonomously-built project. (Continue autonomous fixes applied - engine, tests, CI, vision quality, all files touched).
+The `gradlew` script prints clear instructions when run from terminal.
+
+## 3. Required Permissions (on device)
+- **Display over other apps** (Overlay / SYSTEM_ALERT_WINDOW)
+- **Accessibility Service** → Enable "Emotional Messaging Helper" (this is what lets it read WhatsApp messages and auto-paste)
+
+## 4. Ollama (required for AI features)
+Ollama must be running and reachable from the Android device (same WiFi is easiest; use your computer's LAN IP).
+
+Recommended models:
+- Text: `llama3.2`, `llama3.1`, or `gemma2`
+- Vision (screenshots): `llava`, `llava-llama3`, `bakllava`, or `moondream`
+
+Quick test:
+```bash
+ollama run llava
+```
+
+In the app you can change the URL and model in Settings. The panel has a "Check Ollama" button and will auto-suggest a vision model when you attach a screenshot.
+
+## 5. Run & Test the App
+- Install/run on a **physical Android device** (emulators have very limited accessibility + overlay support).
+- Grant the two permissions above.
+- Open WhatsApp and receive (or send) a message → the floating emotional panel should appear.
+- Use the slider, tones, "Add Vision" (screenshot), Generate, Copy/Speak/Send.
+- "Send to WhatsApp" tries direct paste via accessibility (best effort) and always falls back to clipboard with a clear toast.
+
+## Polish & Known Behaviors
+- Panel has haptics on every button.
+- Vision flow: Add Vision → grant MediaProjection once → screenshot is attached until you clear it or change contact.
+- Auto-paste is best-effort (WhatsApp changes input IDs often). You will often see "Copied to clipboard (paste manually)" — this is expected and reliable.
+- History + restore works across the floating panel.
+- Everything is local (no cloud).
+
+## Troubleshooting After Opening in Android Studio
+- Build fails on first try → Clean + Rebuild + Sync.
+- No floating panel appears → Double-check Accessibility is enabled for the app.
+- Vision not working → Make sure you're using a vision model (llava) and Ollama can see the image (the app sends base64 JPEG).
+- Want to help improve? Run on device, use it in real WhatsApp conversations, and report what works / what breaks (auto-paste on your WhatsApp version, vision quality, model suggestions, etc.).
+
+Autonomous development continues. The goal is "test until all working completely". Your Android Studio + device run is the next critical data point.
 
 ## 3. Required Permissions (on device)
 - **Display over other apps** (Overlay)

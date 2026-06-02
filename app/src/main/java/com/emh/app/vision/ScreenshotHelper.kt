@@ -11,24 +11,25 @@ import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 
 /**
- * Helper for capturing screenshots and preparing them for vision models (Llava).
- * Note: On modern Android, proper screenshotting for accessibility overlays
- * usually requires MediaProjection or special permissions.
+ * Helper for preparing screenshots for vision models (Llava etc).
+ *
+ * NOTE: The actual screen capture is performed by ScreenCaptureService using
+ * MediaProjection (started via MainActivity + ScreenCaptureManager).
+ * The result is stored in ScreenCaptureService.LastScreenshot.base64 and
+ * consumed by EmotionalPanel.
+ *
+ * This object now only contains the JPEG base64 conversion helpers used
+ * by the real capture path.
  */
 object ScreenshotHelper {
 
     /**
-     * Attempts to capture the current screen content.
-     * This is a simplified version. Production apps often use MediaProjection.
+     * @deprecated Real capture uses MediaProjection in ScreenCaptureService.
+     * This always returned null and is kept only for backward compatibility.
      */
+    @Deprecated("Use ScreenCaptureService + LastScreenshot instead", ReplaceWith("null"))
     suspend fun captureScreen(context: Context): ImageBitmap? = withContext(Dispatchers.IO) {
-        try {
-            // This is a placeholder. Real implementation needs more setup.
-            // For now we return null and rely on text-only context.
-            null
-        } catch (e: Exception) {
-            null
-        }
+        null
     }
 
     fun bitmapToBase64(bitmap: Bitmap, quality: Int = 75): String {

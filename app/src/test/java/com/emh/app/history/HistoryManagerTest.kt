@@ -17,8 +17,9 @@ class HistoryManagerTest {
     @Before
     fun setup() {
         context = mock(Context::class.java)
-        // Note: In a real test we would use an in-memory Room database.
-        // For now this is a structural placeholder that will be expanded.
+        // Note: In a real test we would use an in-memory Room database (Room in-memory + test dispatcher).
+        // For now this is a structural placeholder that exercises the public API surface.
+        // Real DB tests live in instrumentation (androidTest) and will be expanded when running in AS.
         historyManager = HistoryManager(context)
     }
 

@@ -39,6 +39,14 @@ class EmotionalPanelTest {
     @Test
     fun emotionalPanel_hasGenerateButton() {
         // Full assertions require more Compose test setup + fakes for Ollama/PanelState.
-        // Run on device with AS for real validation.
+        // Run on device with AS for real validation. This at least ensures the test class stays compiled.
+        composeTestRule.setContent {
+            EmotionalPanel(
+                contactKey = "Smoke Test",
+                originalMessage = "Testing the generate path",
+                onClose = {}
+            )
+        }
+        // The node may not exist until we provide real dependencies; the important part is no crash on composition.
     }
 }

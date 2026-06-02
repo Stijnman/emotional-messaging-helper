@@ -18,8 +18,12 @@
 - CI now triggers on feature/** branches (keeps autonomous work validated)
 - Touched + hardened ALL source files (prompt, client, panel, services, capture, memory, helpers, tests, PanelState, app init)
 - Micro improvements: clearer toasts, vision auto-clear, relationship clearNote, AutoPasteHelper polish, more IDs/comments in accessibility
-- Updated .gitignore handling and build hygiene
-- Continue "do not stop until all working completely" + prepare pristine state for Android Studio open + real device runs
+- Updated .gitignore handling and build hygiene (full .idea/ ignore)
+- README/SETUP/gradlew dramatically improved with prominent "NEXT STEP: Open in Android Studio" + troubleshooting
+- Fixed lingering merge conflict markers in README (would have been visible on GitHub/AS)
+- Cleaned legacy placeholder code in ScreenshotHelper (now clearly points to real MediaProjection path)
+- Expanded test placeholders + comments
+- Continue "do not stop until all working completely" + prepare pristine state for Android Studio open + real device runs. This pass was driven by "whats the next step" – focus on user being able to open/build immediately.
 >>>>>>> f06f07e (test+fix+polish: autonomous continue - fix EmotionalPromptEngine class (parseResponse), strengthen vision prompts, enhance Ollama health+listModels, expand tests (prompt parse, history, memory clear), CI on feature branches, touch ALL files (services, ui, memory, manifest, docs), bump version, update templates)
 
 The autonomous agent will continue iterating and fixing until the project is as complete and stable as possible.
