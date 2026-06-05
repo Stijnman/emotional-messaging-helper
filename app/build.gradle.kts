@@ -82,7 +82,7 @@ dependencies {
     implementation(libs.gson)
 
     // DataStore for settings
-    implementation("androidx.datastore:datastore-preferences:1.1.1")
+    implementation("androidx.datastore:datastore-preferences:1.2.1")
 
     // ==================== TESTING ====================
     // Unit testing
