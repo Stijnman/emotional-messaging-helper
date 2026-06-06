@@ -43,6 +43,17 @@ object ScreenshotHelper {
     /**
      * Returns recommended quality level based on device/network conditions.
      * Lower quality = faster vision analysis, smaller payload.
+     * Phase 3 improvement: dynamic based on "mobile data" hint (future: use ConnectivityManager).
      */
-    fun getRecommendedQuality(): Int = 70
+    fun getRecommendedQuality(onMobileData: Boolean = false): Int {
+        return if (onMobileData) 55 else 70
+    }
+
+    /**
+     * Phase 3: Placeholder for multi-frame vision support.
+     * Future: accept list of Bitmaps (e.g. last 2-3 screenshots) and combine descriptions.
+     */
+    fun bitmapsToBase64Multi(bitmaps: List<Bitmap>, quality: Int = 70): List<String> {
+        return bitmaps.map { bitmapToBase64(it, quality) }
+    }
 }
