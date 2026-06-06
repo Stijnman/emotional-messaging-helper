@@ -1,0 +1,5 @@
+1.0.0
+- Initial release with hierarchical emotional agent, skills, vision, local Ollama support.
+- Phase 1 foundation: README, setup script, paste improvements, memory export.
+- Phase 2 core: Agent orchestrator, 4 skills (deception, tone, empathy, memory update), multi-turn history, UI integration.
+- Phase 3 start: Vision improvements, F-Droid metadata.

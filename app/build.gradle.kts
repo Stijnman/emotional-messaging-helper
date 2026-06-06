@@ -12,6 +12,7 @@ android {
     defaultConfig {
         applicationId = "com.emh.app"
         minSdk = 26
+        //noinspection OldTargetApi
         targetSdk = 35
         versionCode = 3
         versionName = "0.2.1" // Autonomous testing/hardening: engine fix, vision prompt, expanded tests, CI on features, all-files pass
@@ -29,16 +30,13 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
-    }
-
-    kotlinOptions {
-        jvmTarget = "17"
     }
 
     buildFeatures {
@@ -49,6 +47,12 @@ android {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
     }
 }
 
@@ -82,6 +86,7 @@ dependencies {
     implementation(libs.gson)
 
     // DataStore for settings
+    //noinspection GradleDependency
     implementation("androidx.datastore:datastore-preferences:1.1.1")
 
     // ==================== TESTING ====================

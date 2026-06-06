@@ -11,12 +11,13 @@ import com.emh.app.memory.RelationshipMemoryManager
  */
 class SkillRegistry {
 
-    private val enabledSkills = mutableSetOf("deception_flag", "relationship_updater", "tone_analyzer", "empathy_booster")
+    private val enabledSkills = mutableSetOf("deception_flag", "relationship_updater", "tone_analyzer", "empathy_booster", "memory_update")
 
     // Concrete skill objects (v1 - loaded from separate files)
     private val deceptionSkill = DeceptionFlagSkill
     private val toneSkill = ToneAnalyzerSkill
     private val empathySkill = EmpathyBoosterSkill
+    private val memoryUpdateSkill = MemoryUpdateSuggester
 
     fun isEnabled(skillId: String): Boolean = enabledSkills.contains(skillId)
 
@@ -73,6 +74,10 @@ class SkillRegistry {
         }
         if (isEnabled("empathy_booster")) {
             val res = empathySkill.run(context)
+            if (res.isNotBlank()) results.add(res)
+        }
+        if (isEnabled("memory_update")) {
+            val res = memoryUpdateSkill.run(context)
             if (res.isNotBlank()) results.add(res)
         }
         return results

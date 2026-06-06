@@ -78,7 +78,9 @@ See the full autonomous implementation plan in the project issues / previous roa
 
 ## License
 
-MIT (see LICENSE). Personal / Educational / Community use encouraged.
+Apache-2.0 (see LICENSE). Recommended for open community distribution and F-Droid compatibility. Personal, educational, and commercial use permitted with attribution.
+
+See [docs/architecture.md](docs/architecture.md) for detailed architecture.
 
 ## Contributing
 
