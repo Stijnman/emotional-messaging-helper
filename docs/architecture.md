@@ -1,5 +1,7 @@
 # Architecture
 
+> **See [ROADMAP.md](../ROADMAP.md) for the complete remaining work list, phase-by-phase status against the original plan, and what is being closed out systematically.**
+
 ## Overview
 
 Emotional Messaging Helper (EMH) is an Android app that provides AI-powered, emotionally intelligent reply suggestions for WhatsApp using local Ollama models (text + vision).
@@ -60,9 +62,9 @@ It uses AccessibilityService for real-time message detection, MediaProjection fo
 
 ## Extensibility
 
-- Skills in `skills/` package implementing EmhSkill.
-- Agent can invoke enabled skills.
-- Future: more advanced skills, multi-image, F-Droid distribution.
+- Skills in `skills/` package implementing EmhSkill (currently 5, all toggleable via persisted Settings).
+- Agent can invoke enabled skills. Skill notes enrich the hierarchical analysis.
+- See [ROADMAP.md](../ROADMAP.md) for current status on advanced skills, deeper multi-image support in analysis, and F-Droid distribution.
 
 See README for features and quick start.
 

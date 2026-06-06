@@ -65,3 +65,5 @@ Record these flows on a real device with Ollama + llava running for high-quality
 - For skills/memory flows, also briefly show the Settings toggles screen.
 
 Update this file with actual links/GIFs once recorded.
+
+See [ROADMAP.md](ROADMAP.md) for the full list of remaining work being systematically completed (including device validation of all these flows).

@@ -2,6 +2,12 @@
 
 ## [Unreleased / In Development] - Heavy Autonomous Development
 
+### Systematic Closeout of Remaining Areas (ROADMAP-driven)
+- Created `ROADMAP.md` with full gap analysis vs the original pasted implementation plan (Phase 1/2/3 + testing checklist).
+- All remaining areas are now being addressed **one by one** until complete (memory export UI, vision hardening, bottom sheet reasoning, legacy cleanup, testing, F-Droid prep, final docs, etc.).
+- Updated README, architecture.md, and this changelog to accurately reflect Phase status and point to the new roadmap.
+- Goal: Mark the entire roadmap complete, with clean docs and no stale "future" language.
+
 ### Continue Round (5th skill, UI hardening, F-Droid prep)
 - New skill: ConflictDeescalatorSkill (id: conflict_deescalator). Detects blame/escalation/withdrawal language and returns concrete de-escalation guidance ("I feel...", pause, validation first). Fully wired: Settings toggle (persisted), SkillRegistry, orchestrator invoked mapping, panel display.
 - Now 5 skills total, all controllable live via Settings + DataStore.

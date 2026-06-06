@@ -66,23 +66,27 @@ EMH's moat is **psychological depth + local privacy + extensibility via skills**
 
 ## Phase Roadmap (High Level)
 
-**Phase 1 (Done):** Professional docs, one-click Ollama, paste reliability, memory export.
+**Phase 1 (Done):** Professional docs, one-click Ollama script, paste reliability (multi-fallback + haptics), encrypted memory export methods.
 
-**Phase 2 (In Progress / Core Moat):** Hierarchical Emotional Agent Orchestrator + lightweight Skill System (multi-turn, context-aware, skill invocation). 
-- Agent now drives reply generation in the panel.
-- 5 skills active (all toggleable): deception_flag, tone_analyzer, empathy_booster, memory_update, conflict_deescalator.
-- Recent history context for multi-turn.
-- UI shows agent reasoning + invoked skills.
+**Phase 2 (Done — Core Moat):** Hierarchical Emotional Agent Orchestrator + Skill System.
+- Agent now drives all reply generation.
+- 5 skills active and individually toggleable in Settings (with live DataStore persistence): deception_flag, tone_analyzer, empathy_booster, memory_update, conflict_deescalator.
+- Recent history (last 3 turns) for multi-turn awareness.
+- Full agent reasoning visible (expandable + copy + dialog) and skill notes enrich the prompt.
+- Memory suggestions from skills are one-tap applyable.
 
-**Phase 3 (Started):** Vision pipeline improvements (dynamic quality, multi-frame prep), F-Droid metadata structure.
+**Phase 3 (In Progress):** Vision hardening (multi-frame, images in agent context), full F-Droid + release prep, memory export UI, bottom-sheet reasoning, testing & device validation.
 
-See the full autonomous implementation plan in the project issues / previous roadmap notes.
+**Full remaining work, priorities, and original checklist status:** See [ROADMAP.md](ROADMAP.md).
+
+This document is being closed out systematically ("do all areas one by one until it's all done").
 
 ## License
 
 Apache-2.0 (see LICENSE). Recommended for open community distribution and F-Droid compatibility. Personal, educational, and commercial use permitted with attribution.
 
-See [docs/architecture.md](docs/architecture.md) for detailed architecture.
+See [ROADMAP.md](ROADMAP.md) for full remaining work, phase status vs original plan, and checklist.  
+See [docs/architecture.md](docs/architecture.md) for detailed architecture + Mermaid.
 
 ## Contributing
 
@@ -91,3 +95,10 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) and [SETUP.md](SETUP.md).
 ---
 
 **Built autonomously with heavy iteration loops for reliability on real devices.**
+
+## Building for Release / F-Droid
+- Bump version in `app/build.gradle.kts`.
+- For graphics: capture real screenshots on device (see `fastlane/metadata/android/en-US/graphics/README.txt` and `TESTING.md`).
+- Build signed release APK in Android Studio (Build > Generate Signed Bundle/APK).
+- F-Droid metadata skeleton lives in `fdroid/metadata/com.emh.app/`.
+- See [ROADMAP.md](ROADMAP.md) and [TESTING.md](TESTING.md) for the full closeout status and device validation steps.
