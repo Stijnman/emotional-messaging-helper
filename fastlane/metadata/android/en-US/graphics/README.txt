@@ -15,9 +15,15 @@ phoneScreenshots/ (at least 2-8, 1080x1920 or 1080x2400 PNGs, portrait):
 - screenshot6.png (optional): History screen or paste success toast + haptics.
 
 Instructions:
-1. Build + run on physical device.
+1. Build + run on physical device for authentic screenshots.
 2. Use Android Studio Layout Inspector or scrcpy + adb to capture clean screenshots (hide status bar if possible).
 3. Optimize with pngcrush or similar, keep < 1-2MB each.
-4. After real assets added, you can remove or keep this README.txt.
+4. The generated mockups (emh-*.jpg) currently in phoneScreenshots/ and docs/screenshots/ are used for the README.md. Replace with real device captures before any store submission.
+
+Current mockups included for documentation:
+- emh-hero-banner.jpg (promotional)
+- emh-panel-agent.jpg (main floating panel + agent)
+- emh-settings-skills.jpg (toggles)
+- emh-vision-panel.jpg (vision + reply)
 
 For F-Droid: these are also useful for fdroid metadata screenshots (symlink or copy).

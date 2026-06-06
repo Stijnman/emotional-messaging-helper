@@ -1,5 +1,7 @@
 # Emotional Messaging Helper (EMH)
 
+![Emotional Messaging Helper](docs/screenshots/emh-hero-banner.jpg)
+
 Android floating overlay app for WhatsApp that provides psychologically intelligent, emotionally fulfilling reply suggestions using **local AI** (Ollama).
 
 **Local-first • Private • No cloud • Deep emotional intelligence**
@@ -18,6 +20,19 @@ Android floating overlay app for WhatsApp that provides psychologically intellig
 | History + Restore            | Save generations, search, one-tap restore into panel |
 | Smart Auto-Paste             | Direct accessibility paste + reliable clipboard fallback + haptics/toasts |
 | Floating Overlay Panel       | Rich Compose UI with haptics, templates, vision UI |
+
+## Screenshots
+
+These are illustrative mockups of the key screens (real device captures recommended for releases — see `fastlane/metadata/.../graphics/README.txt` and `TESTING.md`).
+
+### Main Floating Panel + Hierarchical Agent
+![Main Panel with Agent Analysis and Skills](docs/screenshots/emh-panel-agent.jpg)
+
+### Skills Configuration in Settings
+![Agent Skills Toggles](docs/screenshots/emh-settings-skills.jpg)
+
+### Vision Context + Reply Generation
+![Vision Attached and Agent Reasoning](docs/screenshots/emh-vision-panel.jpg)
 
 ## Architecture
 
