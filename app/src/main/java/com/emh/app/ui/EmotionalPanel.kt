@@ -215,6 +215,16 @@ fun EmotionalPanel(
                         val willUseVision = imageBase64 != null
 
                         // Phase 2: Full Hierarchical Agent call (analysis + skills + enriched prompt)
+                        // Pull real recent history for multi-turn context (Phase 2 improvement)
+                        val recentHistory = try {
+                            app.historyManager.getAllEntriesSync()
+                                .filter { it.contactKey == contactKey }
+                                .takeLast(3)
+                                .map { it.originalMessage }
+                        } catch (e: Exception) {
+                            emptyList<String>()
+                        }
+
                         val agentResult = agentOrchestrator.generateReply(
                             contactKey = contactKey,
                             incomingMessage = originalMessage,
@@ -222,7 +232,7 @@ fun EmotionalPanel(
                             preferredTone = selectedTone,
                             hasVision = willUseVision,
                             visionDescription = if (willUseVision) "A screenshot of the conversation was captured for additional visual context." else "",
-                            recentHistory = emptyList()
+                            recentHistory = recentHistory
                         )
 
                         agentReasoning = agentResult.reasoning

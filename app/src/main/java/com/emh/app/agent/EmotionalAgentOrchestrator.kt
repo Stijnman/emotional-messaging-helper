@@ -68,6 +68,7 @@ class EmotionalAgentOrchestrator(
             when {
                 note.contains("deception", ignoreCase = true) || note.contains("pattern", ignoreCase = true) -> "deception_flag"
                 note.contains("tone", ignoreCase = true) || note.contains("anger", ignoreCase = true) || note.contains("sad", ignoreCase = true) -> "tone_analyzer"
+                note.contains("vulnerab", ignoreCase = true) || note.contains("empathy", ignoreCase = true) -> "empathy_booster"
                 else -> null
             }
         }.distinct()
