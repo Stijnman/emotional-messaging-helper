@@ -151,6 +151,13 @@ fun EmotionalPanel(
             }
         }
 
+        // Phase 2: Agent mode indicator (always on for now, as per roadmap core)
+        Row {
+            Text("🧠 Advanced Agent Mode", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
+            Spacer(Modifier.width(4.dp))
+            Text("(hierarchical + skills)", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+
         Spacer(Modifier.height(12.dp))
 
         if (visionAttached) {
