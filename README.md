@@ -64,11 +64,15 @@ EMH's moat is **psychological depth + local privacy + extensibility via skills**
 
 ## Phase Roadmap (High Level)
 
-**Phase 1 (Current – Quick Wins):** Professional docs, one-click Ollama, paste reliability, memory export.
+**Phase 1 (Done):** Professional docs, one-click Ollama, paste reliability, memory export.
 
-**Phase 2 (Core Moat):** Hierarchical Emotional Agent Orchestrator + lightweight Skill System (multi-turn, context-aware, skill invocation).
+**Phase 2 (In Progress / Core Moat):** Hierarchical Emotional Agent Orchestrator + lightweight Skill System (multi-turn, context-aware, skill invocation). 
+- Agent now drives reply generation in the panel.
+- 4 skills active: deception_flag, tone_analyzer, empathy_booster, memory_update.
+- Recent history context for multi-turn.
+- UI shows agent reasoning + invoked skills.
 
-**Phase 3:** Vision hardening, F-Droid prep, advanced skills.
+**Phase 3 (Started):** Vision pipeline improvements (dynamic quality, multi-frame prep), F-Droid metadata structure.
 
 See the full autonomous implementation plan in the project issues / previous roadmap notes.
 
