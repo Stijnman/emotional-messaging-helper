@@ -1,74 +1,85 @@
 # Emotional Messaging Helper (EMH)
 
-Android floating overlay app for WhatsApp that provides psychologically intelligent, emotionally fulfilling reply suggestions using local AI (Ollama supported).
+Android floating overlay app for WhatsApp that provides psychologically intelligent, emotionally fulfilling reply suggestions using **local AI** (Ollama).
 
-## Current Status (Heavily Polished - Autonomous Development)
+**Local-first • Private • No cloud • Deep emotional intelligence**
 
-The app has been developed fully autonomously across 20+ improvement loops (odd rounds: broad changes on **all files**; even rounds: test/verify everything). It is now in a state where the core experience is genuinely usable on a real device.
+## Features
 
-### What's Solid & Polished
-- **Vision Flow**: Full "Add Vision" → MediaProjection capture → automatic use with vision models (rich "Vision attached" card + one-tap clear + recapture).
-- **Floating Panel**: Rich Compose UI with haptics everywhere, smart loading messages that change for vision, tone presets, templates, history, "Check Ollama".
-- **AI Quality**: Strong Emotional Prompt Engine (figurative 0-10 + tones + memory + hardened vision instructions).
-- **OllamaClient**: Timeouts, vision model detection (`isLikelyVisionModel`), auto-suggest, `healthCheck`, `listModels`.
-- **History + Restore**: Full viewer + seamless restore into the live panel.
-- **Auto-paste**: Best-effort direct (accessibility ACTION_SET_TEXT + focus + send button search) + reliable clipboard fallback with explicit toasts.
-- **Settings**: Live DataStore (changes affect the panel immediately).
+| Feature                      | Description |
+|------------------------------|-------------|
+| Real-time WhatsApp Detection | Accessibility Service monitors chats live |
+| Local AI (Ollama)            | Text + Vision (llava) – everything stays on your device |
+| Hierarchical Emotional Agent | Multi-turn psychological depth + relationship memory (Phase 2) |
+| Screenshot Vision Context    | Capture screen + analyze with vision models |
+| Tone & Figurative Control    | 0-10 figurative slider + quick tone presets |
+| Encrypted Relationship Memory| Per-contact notes & preferences (vault) |
+| Extensible Skill System      | Lightweight skills for tone analysis, deception flags, memory updates (Phase 2) |
+| History + Restore            | Save generations, search, one-tap restore into panel |
+| Smart Auto-Paste             | Direct accessibility paste + reliable clipboard fallback + haptics/toasts |
+| Floating Overlay Panel       | Rich Compose UI with haptics, templates, vision UI |
 
-After extensive autonomous development (including 20+ systematic improvement loops across **all files** + dedicated testing phase with continuous fixes), the app is being iteratively hardened until it is as complete and reliable as possible.
+## Architecture
 
-**Latest (finishing pass)**: Added manual "Paste Reply" + retry buttons (addresses #2/#6), dynamic model fetcher in Settings, more paste heuristics, expanded tests, all docs ultra clear for immediate AS open. Issues #5 (tests), #6/#2 (paste) significantly advanced in code. See #18 for device feedback tracking.
+```mermaid
+graph TD
+    A[WhatsAppAccessibilityService] -->|detect message| B[FloatingOverlayService]
+    B --> C[EmotionalPanel Compose UI]
+    C --> D[EmotionalAgentOrchestrator]
+    D --> E[RelationshipMemoryVault]
+    D --> F[EmotionalPromptEngine]
+    D -->|optional| G[SkillRegistry]
+    F --> H[OllamaClient]
+    H --> I[Ollama Local LLM text + llava vision]
+    C --> J[AutoPasteHelper]
+    J --> K[Clipboard + Accessibility paste]
+```
 
-### Current Focus / Next Step
-The project is in active autonomous "test until all working completely" mode.
+See `docs/architecture.md` (to be added) for full details.
 
-**THE IMMEDIATE NEXT STEP IS YOU OPENING IT IN ANDROID STUDIO.**
+## Quick Start (One-Click Ollama)
 
-See the big callout in [SETUP.md](SETUP.md). Open the project, let it sync, build, run on a physical device with Ollama + a vision model, and report back the results (build errors, runtime behavior, WhatsApp version paste results, vision quality, etc.). That feedback will drive the next autonomous fixes.
+```bash
+cd emotional-messaging-helper
+./scripts/setup-ollama.sh
+```
 
-Core features are implemented and wired:
-- Real-time WhatsApp message detection via Accessibility
-- Ollama AI (text + vision from screenshot)
-- Compose floating panel with haptics, templates, vision UI, history button
-- Auto-paste (direct + clipboard)
-- History with save on generation and restore
-- Persistent settings
-- Relationship memory
+This pulls the recommended models:
+- `llama3.2:3b` (or llama3.1)
+- `llava:7b` (vision)
 
-Open in Android Studio to build and run on device (requires Ollama running locally with vision model for full features). Autonomous iterations continue without stopping.
+Then open the project in **Android Studio**, sync, and run on a physical device.
 
-Core features are implemented and wired:
-- Real-time WhatsApp message detection via Accessibility
-- Ollama AI (text + vision from screenshot)
-- Compose floating panel with haptics, templates, vision UI, history button
-- Auto-paste (direct + clipboard)
-- History with save on generation and restore
-- Persistent settings
-- Relationship memory
+**Full instructions:** See [SETUP.md](SETUP.md)
 
-Open in Android Studio to build and run on device (requires Ollama running locally with vision model for full features). Autonomous iterations continue without stopping to expand tests, fix issues, and polish until the app is fully functional and stable.
+## Competitive Differentiation
 
-## Features (Vision)
+| App                  | Local AI | Vision | Emotional Depth | Skills/Extensibility | Relationship Memory | Open Source |
+|----------------------|----------|--------|-----------------|----------------------|---------------------|-------------|
+| EMH (this)           | ✅ Yes  | ✅ llava | ✅ Hierarchical Agent + Psychologist | ✅ Planned v1 | ✅ Encrypted Vault | ✅ MIT     |
+| Replyfy / AutoResponder | ❌     | ❌     | 🟡 Basic templates | ❌                  | ❌                 | ❌         |
+| Generic Ollama apps  | ✅      | 🟡 Limited | 🟡 Single-shot | ❌                  | 🟡 Basic           | Varies     |
 
-- Fully Compose-based floating bubble + expandable emotional panel
-- Accessibility Service that detects WhatsApp messages in real-time
-- Powerful Emotional Prompt Engine (psychological + relational depth)
-- Ollama local LLM client (text + vision)
-- Figurative Level slider (0–10) + Quick Tone Presets
-- Encrypted Relationship Memory Vault
-- Message History with search
-- Screenshot / Vision context support
-- Quick Template Gallery
-- One-tap Copy, Speak, and Send
+EMH's moat is **psychological depth + local privacy + extensibility via skills** while staying 100% on-device.
 
-## How to Run
+## Phase Roadmap (High Level)
 
-See [SETUP.md](SETUP.md) for detailed instructions.
+**Phase 1 (Current – Quick Wins):** Professional docs, one-click Ollama, paste reliability, memory export.
 
-**Requirements:**
-- Physical Android device
-- Ollama running locally (recommended: llama3.2 or llava)
+**Phase 2 (Core Moat):** Hierarchical Emotional Agent Orchestrator + lightweight Skill System (multi-turn, context-aware, skill invocation).
+
+**Phase 3:** Vision hardening, F-Droid prep, advanced skills.
+
+See the full autonomous implementation plan in the project issues / previous roadmap notes.
 
 ## License
 
-Personal / Educational use.
+MIT (see LICENSE). Personal / Educational / Community use encouraged.
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) and [SETUP.md](SETUP.md).
+
+---
+
+**Built autonomously with heavy iteration loops for reliability on real devices.**

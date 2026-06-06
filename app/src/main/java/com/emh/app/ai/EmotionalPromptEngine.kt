@@ -98,6 +98,55 @@ Only output valid JSON. Do not add any extra text before or after the JSON.
         return buildPrompt(contactKey, originalMessage, visionDescription, figurativeLevel, tonePreset)
     }
 
+    // === Phase 2: Agent-aware prompt helpers ===
+
+    /**
+     * Builds a rich analysis + planning prompt for the Hierarchical Emotional Agent.
+     * This is the "thinking" step before final reply generation.
+     */
+    fun buildAgentAnalysisPrompt(context: com.emh.app.agent.EmotionalContext): String {
+        return """
+You are an expert relationship psychologist and emotional intelligence coach.
+
+Analyze the situation below and produce:
+1. A concise emotional state summary of the incoming message.
+2. Key relationship dynamics at play (use the provided memory).
+3. Recommended high-level strategy for the reply (tone, depth, whether to address subtext, multi-turn considerations).
+4. Any red flags (manipulation, avoidance, high emotional charge).
+
+${context.toPromptBlock()}
+
+Output in clear structured text (no JSON for this analysis step).
+        """.trimIndent()
+    }
+
+    /**
+     * Final reply generation that takes the agent's analysis into account.
+     * This produces the actual suggested message the user can send.
+     */
+    fun generateEmotionalReply(
+        context: com.emh.app.agent.EmotionalContext,
+        agentAnalysis: String
+    ): String {
+        val basePrompt = buildPrompt(
+            contactKey = context.contactKey,
+            originalMessage = context.incomingMessage,
+            visionDescription = context.visionDescription.takeIf { it.isNotBlank() },
+            figurativeLevel = context.desiredFigurativeLevel,
+            tonePreset = context.preferredTone,
+            relationshipContext = context.relationshipMemory
+        )
+
+        return """
+$basePrompt
+
+### Agent Analysis (use this to inform your reply):
+$agentAnalysis
+
+Craft the best possible reply now. Remember the output format rules above (suggestedReply + insight + tone).
+        """.trimIndent()
+    }
+
     fun parseResponse(rawResponse: String): EmotionalResponse {
         return try {
             // Clean up common LLM JSON formatting issues

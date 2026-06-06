@@ -41,6 +41,10 @@ fun EmotionalPanel(
     var statusMessage by remember { mutableStateOf("") }
     var lastUsedVision by remember { mutableStateOf(false) }
 
+    // Phase 2: Agent visibility
+    var agentReasoning by remember { mutableStateOf("") }
+    var agentSkillsUsed by remember { mutableStateOf(emptyList<String>()) }
+
     // Auto-clear vision when contact changes (smart behavior)
     var lastContact by remember { mutableStateOf(contactKey) }
     LaunchedEffect(contactKey) {
@@ -54,6 +58,8 @@ fun EmotionalPanel(
     val scope = rememberCoroutineScope()
     val ollama = remember { OllamaClient() }
     val promptEngine = remember { EmotionalPromptEngine(app.memoryManager) }
+    val skillRegistry = remember { com.emh.app.skills.SkillRegistry() }
+    val agentOrchestrator = remember { com.emh.app.agent.EmotionalAgentOrchestrator(app.memoryManager, promptEngine, skillRegistry) }
     val haptic = LocalHapticFeedback.current
 
     // Load settings on composition
@@ -206,27 +212,36 @@ fun EmotionalPanel(
                     }
                     scope.launch {
                         val imageBase64 = com.emh.app.vision.ScreenCaptureService.lastScreenshotBase64
+                        val willUseVision = imageBase64 != null
 
-                        val prompt = promptEngine.buildPrompt(
+                        // Phase 2: Full Hierarchical Agent call (analysis + skills + enriched prompt)
+                        val agentResult = agentOrchestrator.generateReply(
                             contactKey = contactKey,
-                            originalMessage = originalMessage,
-                            visionDescription = if (imageBase64 != null) "A screenshot of the conversation was captured for additional visual context." else null,
-                            figurativeLevel = figurativeLevel,
-                            tonePreset = selectedTone
+                            incomingMessage = originalMessage,
+                            desiredFigurativeLevel = figurativeLevel,
+                            preferredTone = selectedTone,
+                            hasVision = willUseVision,
+                            visionDescription = if (willUseVision) "A screenshot of the conversation was captured for additional visual context." else "",
+                            recentHistory = emptyList()
                         )
 
-                        lastUsedVision = imageBase64 != null
+                        agentReasoning = agentResult.reasoning
+                        agentSkillsUsed = agentResult.invokedSkills
 
-                        val effectiveModel = if (imageBase64 != null && !OllamaClient.isLikelyVisionModel(currentModel)) {
+                        val finalPrompt = agentResult.suggestedReply  // enriched prompt from agent
+
+                        lastUsedVision = willUseVision
+
+                        val effectiveModel = if (willUseVision && !OllamaClient.isLikelyVisionModel(currentModel)) {
                             OllamaClient.suggestVisionModelIfNeeded(currentModel)
                         } else {
                             currentModel
                         }
 
-                        val result = if (imageBase64 != null) {
-                            ollama.generateWithImages(effectiveModel, prompt, listOf(imageBase64))
+                        val result = if (willUseVision && imageBase64 != null) {
+                            ollama.generateWithImages(effectiveModel, finalPrompt, listOf(imageBase64))
                         } else {
-                            ollama.generate(currentModel, prompt)
+                            ollama.generate(currentModel, finalPrompt)
                         }
 
                         result.onSuccess { raw ->
@@ -284,6 +299,36 @@ fun EmotionalPanel(
                 }
             }
             Text(emotionalInsight, style = MaterialTheme.typography.bodyMedium)
+        }
+
+        // Phase 2: Display agent reasoning and skills (simple, always visible when present)
+        if (agentReasoning.isNotBlank() || agentSkillsUsed.isNotEmpty()) {
+            Spacer(Modifier.height(12.dp))
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
+                )
+            ) {
+                Column(Modifier.padding(12.dp)) {
+                    Text("🧠 Agent Analysis", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
+                    if (agentReasoning.isNotBlank()) {
+                        Text(
+                            agentReasoning.take(280) + if (agentReasoning.length > 280) "..." else "",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    if (agentSkillsUsed.isNotEmpty()) {
+                        Spacer(Modifier.height(6.dp))
+                        Text(
+                            "Skills invoked: ${agentSkillsUsed.joinToString(", ")}",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.tertiary
+                        )
+                    }
+                }
+            }
         }
 
         if (suggestedReply.isNotBlank()) {

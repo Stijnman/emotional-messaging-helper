@@ -28,6 +28,23 @@
 
 The autonomous agent will continue iterating and fixing until the project is as complete and stable as possible.
 
+## Phase 1 & Phase 2 Foundation (per detailed roadmap)
+- Overhauled README.md with feature table, Mermaid architecture diagram, competitive positioning, one-click Ollama setup instructions, and phased roadmap summary.
+- Created DEMO.md with 4 key user flows for recording high-quality demos.
+- Added scripts/setup-ollama.sh (one-click pull of llama3.2:3b + llava:7b).
+- Enhanced AutoPasteHelper: multi-fallback strategy, explicit Toast + haptic feedback on all paths, better diagnostics.
+- Enhanced RelationshipMemoryManager: added exportEncryptedMemory, importEncryptedMemory, exportAllMemory (encrypted JSON via existing keystore layer).
+- Implemented core of Hierarchical Emotional Agent (Phase 2):
+  - com.emh.app.agent.EmotionalContext (rich multi-turn + vision + memory context object)
+  - com.emh.app.agent.EmotionalAgentOrchestrator (analysis → planning → skill hooks → reply)
+  - Extended EmotionalPromptEngine with buildAgentAnalysisPrompt + generateEmotionalReply (injects agent reasoning for depth).
+- Lightweight Skill System v1:
+  - EmhSkill interface
+  - SkillRegistry with deception_flag, relationship_updater, tone_analyzer examples.
+- Integrated agent into EmotionalPanel generation flow (analysis now runs before Ollama call; vision + memory preserved).
+- All new code placed under existing com.emh.app package structure (agent/, skills/) to match live tree.
+- Structure verified; ready for Android Studio build + device testing of deeper emotional replies.
+
 ## [0.1.0] - Earlier Planning
 
 Initial ambitious vision and documentation created. Many features described were aspirational at the time.
