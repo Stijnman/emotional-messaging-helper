@@ -12,7 +12,8 @@ data class EmotionalContext(
     val desiredFigurativeLevel: Int = 5,      // 0 = direct, 10 = highly poetic/metaphorical
     val preferredTone: String = "",           // e.g. "warm and supportive", "playful", "direct"
     val hasVisionContext: Boolean = false,
-    val visionDescription: String = ""
+    val visionDescription: String = "",
+    val visionImages: List<String> = emptyList()  // base64 JPEGs for multi-frame vision (Phase 3 hardening)
 ) {
     fun toPromptBlock(): String = buildString {
         appendLine("Contact: $contactKey")
@@ -28,6 +29,9 @@ data class EmotionalContext(
         appendLine("User wants tone: ${preferredTone.ifBlank { "natural and emotionally intelligent" }} (Figurative level: $desiredFigurativeLevel/10)")
         if (hasVisionContext) {
             appendLine("Visual context from screenshot is available.")
+            if (visionImages.isNotEmpty()) {
+                appendLine("Number of vision frames provided: ${visionImages.size} (multi-frame support active).")
+            }
         }
         appendLine("Incoming message from the other person: \"$incomingMessage\"")
     }

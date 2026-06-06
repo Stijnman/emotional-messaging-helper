@@ -26,6 +26,7 @@ class SettingsRepository(private val context: Context) {
         val SKILL_EMPATHY = booleanPreferencesKey("skill_empathy_enabled")
         val SKILL_MEMORY = booleanPreferencesKey("skill_memory_enabled")
         val SKILL_CONFLICT = booleanPreferencesKey("skill_conflict_enabled")  // 5th skill: ConflictDeescalator
+        val USE_HIERARCHICAL_AGENT = booleanPreferencesKey("use_hierarchical_agent")  // global master toggle (Phase 2/3 closeout)
     }
 
     val ollamaUrl: Flow<String> = context.dataStore.data.map { prefs ->
@@ -76,6 +77,10 @@ class SettingsRepository(private val context: Context) {
         prefs[Keys.SKILL_CONFLICT] ?: true
     }
 
+    val useHierarchicalAgent: Flow<Boolean> = context.dataStore.data.map { prefs ->
+        prefs[Keys.USE_HIERARCHICAL_AGENT] ?: true
+    }
+
     suspend fun setSkillDeceptionEnabled(enabled: Boolean) {
         context.dataStore.edit { it[Keys.SKILL_DECEPTION] = enabled }
     }
@@ -90,6 +95,10 @@ class SettingsRepository(private val context: Context) {
     }
     suspend fun setSkillConflictEnabled(enabled: Boolean) {
         context.dataStore.edit { it[Keys.SKILL_CONFLICT] = enabled }
+    }
+
+    suspend fun setUseHierarchicalAgent(enabled: Boolean) {
+        context.dataStore.edit { it[Keys.USE_HIERARCHICAL_AGENT] = enabled }
     }
 
     /** Snapshot of current skill enables (call from suspend context before agent runs). */

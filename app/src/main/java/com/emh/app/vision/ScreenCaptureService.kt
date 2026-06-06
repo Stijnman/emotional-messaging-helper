@@ -89,55 +89,62 @@ class ScreenCaptureService : Service() {
         )
 
         imageReader?.setOnImageAvailableListener({ reader ->
-            val image = reader.acquireLatestImage() ?: return@setOnImageAvailableListener
-
             scope.launch {
-                val planes = image.planes
-                val buffer = planes[0].buffer
-                val pixelStride = planes[0].pixelStride
-                val rowStride = planes[0].rowStride
-                val rowPadding = rowStride - pixelStride * width
+                val capturedBase64s = mutableListOf<String>()
+                val onMobile = ScreenshotHelper.isLikelyOnMobileData(this@ScreenCaptureService)
+                val quality = ScreenshotHelper.getRecommendedQuality(onMobile)
 
-                val bitmap = Bitmap.createBitmap(
-                    width + rowPadding / pixelStride,
-                    height,
-                    Bitmap.Config.ARGB_8888
-                )
-                bitmap.copyPixelsFromBuffer(buffer)
+                // Phase 3 hardening: Grab multiple frames in a single capture session (small delay between shots)
+                // for richer multi-frame context sent to llava.
+                repeat(2) { frameIdx ->
+                    val image = reader.acquireLatestImage() ?: return@launch
+                    try {
+                        val planes = image.planes
+                        val buffer = planes[0].buffer
+                        val pixelStride = planes[0].pixelStride
+                        val rowStride = planes[0].rowStride
+                        val rowPadding = rowStride - pixelStride * width
 
-                // Crop to actual screen size
-                val cropped = Bitmap.createBitmap(bitmap, 0, 0, width, height)
+                        val bitmap = Bitmap.createBitmap(
+                            width + rowPadding / pixelStride,
+                            height,
+                            Bitmap.Config.ARGB_8888
+                        )
+                        bitmap.copyPixelsFromBuffer(buffer)
 
-                // Convert to base64 JPEG for Ollama vision (using improved helper)
-                // Dynamic quality (Phase 3) + multi-frame via ring buffer (see getRecentVisionBase64).
-                val quality = ScreenshotHelper.getRecommendedQuality() // can extend for onMobileData hint
+                        val cropped = Bitmap.createBitmap(bitmap, 0, 0, width, height)
+                        val base64Image = ScreenshotHelper.bitmapToBase64(cropped, quality)
 
-                val base64Image = ScreenshotHelper.bitmapToBase64(cropped, quality)
+                        capturedBase64s.add(base64Image)
+                        lastScreenshotBase64 = base64Image
 
-                // Store for the floating panel to pick up (standardized name)
-                lastScreenshotBase64 = base64Image
+                        // Keep the ring buffer updated (newest first)
+                        synchronized(recentScreenshots) {
+                            recentScreenshots.add(0, base64Image)
+                            while (recentScreenshots.size > MAX_RECENT) {
+                                recentScreenshots.removeAt(recentScreenshots.lastIndex)
+                            }
+                        }
 
-                // Multi-frame ring buffer (newest first). Enables sending several recent frames to vision model.
-                synchronized(recentScreenshots) {
-                    recentScreenshots.add(0, base64Image)
-                    while (recentScreenshots.size > MAX_RECENT) {
-                        recentScreenshots.removeAt(recentScreenshots.lastIndex)
+                        android.util.Log.d("EMH", "Frame ${frameIdx + 1}/2 captured for vision")
+
+                        if (frameIdx < 1) {
+                            kotlinx.coroutines.delay(110) // brief pause for distinct second frame
+                        }
+                    } finally {
+                        image.close()
                     }
                 }
 
-                android.util.Log.d("EMH", "Screenshot captured and ready for vision: ${cropped.width}x${cropped.height} (quality=$quality) recent=${recentScreenshots.size}")
+                android.util.Log.d("EMH", "Multi-frame capture complete: ${capturedBase64s.size} frame(s)")
 
                 // Notify user
                 android.widget.Toast.makeText(
                     this@ScreenCaptureService,
-                    "Screenshot captured for EMH vision",
+                    "Vision ready (${capturedBase64s.size} frames)",
                     android.widget.Toast.LENGTH_SHORT
                 ).show()
 
-                // AUTONOMOUS LOOP IMPROVEMENT: Added explicit success notification for better user feedback in vision flows.
-                // Image is JPEG compressed in ScreenshotHelper for faster Ollama vision roundtrips.
-
-                image.close()
                 stopSelf()
             }
         }, null)

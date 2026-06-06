@@ -40,7 +40,8 @@ class EmotionalAgentOrchestrator(
         preferredTone: String,
         hasVision: Boolean = false,
         visionDescription: String = "",
-        recentHistory: List<String> = emptyList()
+        recentHistory: List<String> = emptyList(),
+        visionImages: List<String> = emptyList()   // Phase 3: pass multi-frame images into context
     ): AgentResult {
         val context = EmotionalContext(
             contactKey = contactKey,
@@ -50,14 +51,15 @@ class EmotionalAgentOrchestrator(
             desiredFigurativeLevel = desiredFigurativeLevel,
             preferredTone = preferredTone,
             hasVisionContext = hasVision,
-            visionDescription = visionDescription
+            visionDescription = visionDescription,
+            visionImages = visionImages
         )
 
         // Step 1 + 2: Analysis + Planning via the prompt engine (enhanced for agent use)
         val analysisAndPlan = promptEngine.buildAgentAnalysisPrompt(context)
 
-        // For v1 we keep a single strong generation call, but the structure is ready
-        // for true multi-step (analysis → plan → final) in future iterations.
+        // Current design (efficient for on-device LLM): single strong generation call with rich pre-analysis + skill enrichment.
+        // The structure (separate analysis prompt + final) makes future true multi-step easy to add if needed.
         val finalReply = promptEngine.generateEmotionalReply(
             context = context,
             agentAnalysis = analysisAndPlan

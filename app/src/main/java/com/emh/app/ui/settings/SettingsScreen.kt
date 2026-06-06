@@ -5,6 +5,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.material3.Switch
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.emh.app.EMHApplication
@@ -22,6 +24,7 @@ fun SettingsScreen() {
     var autoAnalyze by remember { mutableStateOf(true) }
 
     val scope = rememberCoroutineScope()
+    val haptic = LocalHapticFeedback.current
 
     // Load current values
     LaunchedEffect(Unit) {
@@ -122,6 +125,7 @@ fun SettingsScreen() {
         var skillEmpathy by remember { mutableStateOf(true) }
         var skillMemory by remember { mutableStateOf(true) }
         var skillConflict by remember { mutableStateOf(true) }
+        var useHierarchicalAgent by remember { mutableStateOf(true) }
 
         LaunchedEffect(Unit) {
             repo.skillDeceptionEnabled.collect { skillDeception = it }
@@ -137,6 +141,9 @@ fun SettingsScreen() {
         }
         LaunchedEffect(Unit) {
             repo.skillConflictEnabled.collect { skillConflict = it }
+        }
+        LaunchedEffect(Unit) {
+            repo.useHierarchicalAgent.collect { useHierarchicalAgent = it }
         }
 
         Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
@@ -180,6 +187,17 @@ fun SettingsScreen() {
             }
         }
 
+        Spacer(Modifier.height(12.dp))
+
+        Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+            Switch(checked = useHierarchicalAgent, onCheckedChange = { useHierarchicalAgent = it })
+            Spacer(Modifier.width(8.dp))
+            Column {
+                Text("Use Hierarchical Agent (recommended)")
+                Text("When off, falls back to simpler direct prompt (useful for comparison or lighter models)", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        }
+
         Spacer(Modifier.height(32.dp))
 
         Button(onClick = {
@@ -192,6 +210,7 @@ fun SettingsScreen() {
                 repo.setSkillEmpathyEnabled(skillEmpathy)
                 repo.setSkillMemoryEnabled(skillMemory)
                 repo.setSkillConflictEnabled(skillConflict)
+                repo.setUseHierarchicalAgent(useHierarchicalAgent)
             }
         }) {
             Text("Save Settings")
@@ -212,6 +231,65 @@ fun SettingsScreen() {
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
+
+        Spacer(Modifier.height(32.dp))
+
+        // === Phase 1.4: Memory Export / Import UI (now exposed per ROADMAP closeout) ===
+        Text("Relationship Memory Vault", style = MaterialTheme.typography.titleMedium)
+        Text(
+            "Export or import your encrypted per-contact notes. Data stays private (originates from Android Keystore protected storage).",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Spacer(Modifier.height(8.dp))
+
+        var importJson by remember { mutableStateOf("") }
+        var memoryStatus by remember { mutableStateOf("") }
+
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            OutlinedButton(onClick = {
+                scope.launch {
+                    val json = app.memoryManager.exportAllMemory()
+                    val clipboard = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                    clipboard.setPrimaryClip(android.content.ClipData.newPlainText("EMH Memory Export", json))
+                    memoryStatus = "All memory exported & copied to clipboard (JSON). Keep it safe."
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                }
+            }) {
+                Text("Export All Memory")
+            }
+
+            OutlinedButton(onClick = {
+                scope.launch {
+                    val ok = if (importJson.isNotBlank()) {
+                        app.memoryManager.importEncryptedMemory(importJson)
+                    } else false
+                    memoryStatus = if (ok) "Memory imported successfully." else "Import failed (invalid JSON or empty)."
+                    if (ok) importJson = ""
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                }
+            }) {
+                Text("Import")
+            }
+        }
+
+        OutlinedTextField(
+            value = importJson,
+            onValueChange = { importJson = it },
+            label = { Text("Paste exported JSON here to import") },
+            modifier = Modifier.fillMaxWidth(),
+            minLines = 2,
+            maxLines = 4
+        )
+
+        if (memoryStatus.isNotBlank()) {
+            Spacer(Modifier.height(4.dp))
+            Text(
+                memoryStatus,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
 
         // AUTONOMOUS IMPROVEMENT (20 loops): Settings screen reviewed and enhanced for better user guidance in every cycle.
     }
