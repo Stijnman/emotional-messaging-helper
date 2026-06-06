@@ -5,9 +5,9 @@ import com.emh.app.memory.RelationshipMemoryManager
 
 /**
  * Central registry for all available skills.
- * In v1 skills are simple and can be toggled.
+ * Skills are simple, fast, and fully toggleable via Settings (DataStore).
  *
- * Future: load from assets/skills/ or allow user-installed prompt skills.
+ * Extension point for future: dynamic loading can be added later.
  */
 class SkillRegistry {
 
@@ -46,20 +46,7 @@ class SkillRegistry {
         )
     }
 
-    /**
-     * Suggest relationship update (heuristic for now).
-     */
-    fun suggestRelationshipUpdate(
-        contactKey: String,
-        incomingMessage: String,
-        memoryManager: RelationshipMemoryManager
-    ) {
-        if (!isEnabled("relationship_updater")) return
-        val lower = incomingMessage.lowercase()
-        if (lower.contains("thank you") || lower.contains("appreciate")) {
-            // Surface suggestion in future UI
-        }
-    }
+    // Legacy relationship_updater path removed during systematic ROADMAP closeout (no longer used; memory suggestions now come from MemoryUpdateSuggester).
 
     fun runToneAnalyzer(context: EmotionalContext): String {
         if (!isEnabled("tone_analyzer")) return ""
