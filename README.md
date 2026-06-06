@@ -70,7 +70,7 @@ EMH's moat is **psychological depth + local privacy + extensibility via skills**
 
 **Phase 2 (In Progress / Core Moat):** Hierarchical Emotional Agent Orchestrator + lightweight Skill System (multi-turn, context-aware, skill invocation). 
 - Agent now drives reply generation in the panel.
-- 4 skills active: deception_flag, tone_analyzer, empathy_booster, memory_update.
+- 5 skills active (all toggleable): deception_flag, tone_analyzer, empathy_booster, memory_update, conflict_deescalator.
 - Recent history context for multi-turn.
 - UI shows agent reasoning + invoked skills.
 

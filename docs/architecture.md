@@ -79,7 +79,7 @@ flowchart TD
     G --> H[EmotionalAgentOrchestrator]
     H --> I[buildAgentAnalysisPrompt]
     I --> J[PromptEngine + Ollama analysis]
-    J --> K[runEnabledSkills 4 skills in parallel]
+    J --> K[runEnabledSkills (enabled skills in parallel)]
     K --> L[Enrich analysis with skill notes]
     L --> M[generateEmotionalReply with enriched]
     M --> N[If vision: ollama.generateWithImages up to 2 recent frames]
