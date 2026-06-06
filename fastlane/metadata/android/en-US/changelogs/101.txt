@@ -1,0 +1,11 @@
+Phase 2/3 continued (autonomous keep-going increment):
+- Real multi-frame vision: ring buffer of recent screenshots (up to 3), EmotionalPanel now sends 1-2 frames to llava when available for richer visual context.
+- Persistent per-skill toggles in Settings (DataStore): Deception Flag, Tone Analyzer, Empathy Booster, Memory Update Suggester. Live configuration before each agent run.
+- MemoryUpdateSuggester effect: suggestions now surfaced in UI as "💾 Suggested memory update" card with one-tap "Apply to memory for this contact" (appends via new appendNote helper).
+- Agent reasoning UX: 🧠 Agent Analysis card is now tappable; opens full "Why this reply?" AlertDialog with complete enriched analysis + skills list.
+- 3 new JVM unit tests for skills (DeceptionFlag, MemoryUpdateSuggester, SkillRegistry configure/run behavior) following existing mockito/junit patterns.
+- SkillRegistry hardened: configureEnabled() + cleaned defaults (focus on the 4 real skills).
+- UI/Settings polish + small vision buffer clear helpers.
+- Updated architecture notes and fastlane metadata.
+
+All changes on feature/phase2-agent-skills. Ready for device validation of agent depth + skill impact + vision multi + settings persistence.

@@ -116,10 +116,15 @@ class ScreenCaptureService : Service() {
                 // Store for the floating panel to pick up (standardized name)
                 lastScreenshotBase64 = base64Image
 
-                android.util.Log.d("EMH", "Screenshot captured and ready for vision: ${cropped.width}x${cropped.height} (quality=$quality)")
+                // Multi-frame ring buffer (newest first). Enables sending several recent frames to vision model.
+                synchronized(recentScreenshots) {
+                    recentScreenshots.add(0, base64Image)
+                    while (recentScreenshots.size > MAX_RECENT) {
+                        recentScreenshots.removeAt(recentScreenshots.lastIndex)
+                    }
+                }
 
-                // Phase 3 stub: For multi-image, could capture multiple frames here and use bitmapsToBase64Multi
-                // e.g. if (needMulti) lastMultiScreenshots = listOf(...)
+                android.util.Log.d("EMH", "Screenshot captured and ready for vision: ${cropped.width}x${cropped.height} (quality=$quality) recent=${recentScreenshots.size}")
 
                 // Notify user
                 android.widget.Toast.makeText(
@@ -151,5 +156,25 @@ class ScreenCaptureService : Service() {
          * Used by EmotionalPanel and others.
          */
         var lastScreenshotBase64: String? = null
+
+        // Phase 3 multi-frame support: ring buffer of recent captures (newest first).
+        // Allows EmotionalPanel to send 1-2 (or more) images to llava for richer visual context.
+        private val recentScreenshots = mutableListOf<String>()
+        private const val MAX_RECENT = 3
+
+        /** Returns up to [max] most recent screenshot base64 strings (newest first). */
+        @JvmStatic
+        fun getRecentVisionBase64(max: Int = 2): List<String> {
+            synchronized(recentScreenshots) {
+                return recentScreenshots.take(max).toList()
+            }
+        }
+
+        /** Clears both single and multi-frame buffers (used on contact switch / after use). */
+        @JvmStatic
+        fun clearVisionBuffers() {
+            lastScreenshotBase64 = null
+            synchronized(recentScreenshots) { recentScreenshots.clear() }
+        }
     }
 }

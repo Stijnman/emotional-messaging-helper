@@ -1,9 +1,21 @@
-Emotional Messaging Helper uses your local Ollama (llama + llava) to craft psychologically deep, relationship-aware replies for WhatsApp.
+Emotional Messaging Helper uses your local Ollama (llama3.2 + llava) to craft psychologically deep, relationship-aware replies for WhatsApp.
 
-- Real-time message detection via accessibility
-- Screenshot vision context
-- Hierarchical emotional agent + skills (deception detection, tone analysis)
-- Encrypted per-contact memory
-- Fully on-device, no cloud
+Core features:
+• Real-time WhatsApp message detection (AccessibilityService)
+• Screenshot vision context via MediaProjection + llava (dynamic JPEG quality + multi-frame ring buffer support)
+• Hierarchical Emotional Agent (analysis → strategy → skills → enriched final prompt)
+• 4 pluggable skills you can toggle in Settings:
+  - Deception/Pattern Flag (gaslighting, absolute language, social proof)
+  - Tone Analyzer (anger/sadness/pressure cues + strategy)
+  - Empathy Booster (vulnerability validation suggestions)
+  - Memory Update Suggester (preference/event notes you can one-tap apply)
+• Encrypted per-contact Relationship Memory Vault (exportable)
+• Recent conversation history (last 3 turns) for true multi-turn awareness
+• Floating Compose panel: tone slider, figurative intensity, vision attach, templates, TTS, robust paste (multi-fallback + manual retry)
+• Fully local-first, no cloud, privacy-first
 
-Perfect for thoughtful communication without sacrificing privacy.
+Settings let you control Ollama URL/model, auto-analyze, and exactly which skills are active. Agent reasoning is shown live and tappable for full "Why this reply?" details.
+
+Perfect for thoughtful, context-rich communication without sacrificing privacy or sending data off-device.
+
+Phase 2 agent + skills are the primary differentiator vs generic responders. Vision and memory make every suggestion personal.

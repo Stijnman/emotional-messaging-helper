@@ -43,6 +43,14 @@ It uses AccessibilityService for real-time message detection, MediaProjection fo
 - Hierarchical agent loop: Analysis → Strategy → Skills → Final Reply.
 - Skills are lightweight, return insights that enrich the prompt.
 - Multi-turn via recent history in context.
+- Skill enable/disable persisted in DataStore and live-configured into SkillRegistry before each run.
+- MemoryUpdateSuggester output is now consumable (UI apply → appendNote on the encrypted vault).
+
+## Recent Increments (keep going)
+
+- Multi-frame vision: ScreenCaptureService keeps a small ring buffer of recent JPEG base64 captures. EmotionalPanel forwards up to 2 images to the vision model call when present (falls back gracefully).
+- Agent transparency: reasoning card is interactive and opens a full "Why this reply?" dialog containing the complete enriched analysis injected into the final prompt.
+- Settings now exposes per-skill switches with descriptions.
 
 ## Vision
 
@@ -57,3 +65,32 @@ It uses AccessibilityService for real-time message detection, MediaProjection fo
 - Future: more advanced skills, multi-image, F-Droid distribution.
 
 See README for features and quick start.
+
+## Agent + Skills Flow (Mermaid)
+
+```mermaid
+flowchart TD
+    A[WhatsApp message detected] --> B[Floating EmotionalPanel]
+    B --> C{User: tone/figurative + optional Vision}
+    C --> D[On Generate]
+    D --> E[Load recentHistory last-3 + Memory]
+    E --> F[EmotionalContext built]
+    F --> G[SkillRegistry.configureEnabled from DataStore]
+    G --> H[EmotionalAgentOrchestrator]
+    H --> I[buildAgentAnalysisPrompt]
+    I --> J[PromptEngine + Ollama analysis]
+    J --> K[runEnabledSkills 4 skills in parallel]
+    K --> L[Enrich analysis with skill notes]
+    L --> M[generateEmotionalReply with enriched]
+    M --> N[If vision: ollama.generateWithImages up to 2 recent frames]
+    N --> O[parse + show reply + insight]
+    O --> P[🧠 Agent card clickable → full reasoning dialog]
+    O --> Q[💾 Memory suggestion? → one-tap appendNote]
+    K -.->|deception_flag| R[DeceptionFlagSkill]
+    K -.->|tone_analyzer| S[ToneAnalyzerSkill]
+    K -.->|empathy_booster| T[EmpathyBoosterSkill]
+    K -.->|memory_update| U[MemoryUpdateSuggester]
+```
+
+Skills return short insight strings that are appended to reasoning and re-injected. All processing stays on-device. Toggles in Settings control which K branches execute.
+

@@ -11,13 +11,20 @@ import com.emh.app.memory.RelationshipMemoryManager
  */
 class SkillRegistry {
 
-    private val enabledSkills = mutableSetOf("deception_flag", "relationship_updater", "tone_analyzer", "empathy_booster", "memory_update")
+    private val enabledSkills = mutableSetOf("deception_flag", "tone_analyzer", "empathy_booster", "memory_update")
 
     // Concrete skill objects (v1 - loaded from separate files)
     private val deceptionSkill = DeceptionFlagSkill
     private val toneSkill = ToneAnalyzerSkill
     private val empathySkill = EmpathyBoosterSkill
     private val memoryUpdateSkill = MemoryUpdateSuggester
+
+    /** Configure enables from persisted settings (called before agent runs). */
+    fun configureEnabled(enables: Map<String, Boolean>) {
+        enables.forEach { (id, on) ->
+            if (on) enabledSkills.add(id) else enabledSkills.remove(id)
+        }
+    }
 
     fun isEnabled(skillId: String): Boolean = enabledSkills.contains(skillId)
 
@@ -61,6 +68,7 @@ class SkillRegistry {
     /**
      * Run all enabled skills and return combined notes.
      * This is what the orchestrator should call for clean integration.
+     * Call configureEnabled(...) first (from SettingsRepository snapshot) for persistence.
      */
     fun runEnabledSkills(context: EmotionalContext): List<String> {
         val results = mutableListOf<String>()

@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.material3.Switch
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.emh.app.EMHApplication
@@ -105,6 +106,68 @@ fun SettingsScreen() {
             Text("Automatically analyze new WhatsApp messages")
         }
 
+        Spacer(Modifier.height(24.dp))
+
+        // === Phase 2/3: Agent Skill Toggles (persisted, control which insights enrich the agent prompt) ===
+        Text("Agent Skills", style = MaterialTheme.typography.titleMedium)
+        Text(
+            "Enable or disable individual skills. Disabled skills are skipped during hierarchical analysis.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Spacer(Modifier.height(8.dp))
+
+        var skillDeception by remember { mutableStateOf(true) }
+        var skillTone by remember { mutableStateOf(true) }
+        var skillEmpathy by remember { mutableStateOf(true) }
+        var skillMemory by remember { mutableStateOf(true) }
+
+        LaunchedEffect(Unit) {
+            repo.skillDeceptionEnabled.collect { skillDeception = it }
+        }
+        LaunchedEffect(Unit) {
+            repo.skillToneEnabled.collect { skillTone = it }
+        }
+        LaunchedEffect(Unit) {
+            repo.skillEmpathyEnabled.collect { skillEmpathy = it }
+        }
+        LaunchedEffect(Unit) {
+            repo.skillMemoryEnabled.collect { skillMemory = it }
+        }
+
+        Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+            Switch(checked = skillDeception, onCheckedChange = { skillDeception = it })
+            Spacer(Modifier.width(8.dp))
+            Column {
+                Text("Deception / Pattern Flag")
+                Text("Detects gaslighting, absolute language, social proof pressure", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        }
+        Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+            Switch(checked = skillTone, onCheckedChange = { skillTone = it })
+            Spacer(Modifier.width(8.dp))
+            Column {
+                Text("Tone Analyzer")
+                Text("Identifies anger/sadness/pressure and suggests reply strategy", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        }
+        Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+            Switch(checked = skillEmpathy, onCheckedChange = { skillEmpathy = it })
+            Spacer(Modifier.width(8.dp))
+            Column {
+                Text("Empathy Booster")
+                Text("Recommends validation phrases on vulnerability cues", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        }
+        Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+            Switch(checked = skillMemory, onCheckedChange = { skillMemory = it })
+            Spacer(Modifier.width(8.dp))
+            Column {
+                Text("Memory Update Suggester")
+                Text("Proposes non-destructive notes (preferences/events) you can apply", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        }
+
         Spacer(Modifier.height(32.dp))
 
         Button(onClick = {
@@ -112,6 +175,10 @@ fun SettingsScreen() {
                 repo.setOllamaUrl(ollamaUrl)
                 repo.setDefaultModel(model)
                 repo.setAutoAnalyze(autoAnalyze)
+                repo.setSkillDeceptionEnabled(skillDeception)
+                repo.setSkillToneEnabled(skillTone)
+                repo.setSkillEmpathyEnabled(skillEmpathy)
+                repo.setSkillMemoryEnabled(skillMemory)
             }
         }) {
             Text("Save Settings")

@@ -35,6 +35,14 @@ class RelationshipMemoryManager(context: Context) {
         return prefs.getString("note_$contactKey", "") ?: ""
     }
 
+    /** Append (non-destructive) to existing note for the contact. Used by MemoryUpdateSuggester apply flow. */
+    fun appendNote(contactKey: String, addition: String) {
+        if (addition.isBlank()) return
+        val existing = getNote(contactKey)
+        val combined = if (existing.isBlank()) addition else "$existing | $addition"
+        saveNote(contactKey, combined.take(2000)) // guard against unbounded growth
+    }
+
     fun savePreference(contactKey: String, key: String, value: String) {
         prefs.edit().putString("${contactKey}_$key", value).apply()
     }

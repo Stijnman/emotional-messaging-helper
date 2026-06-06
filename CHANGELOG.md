@@ -2,6 +2,18 @@
 
 ## [Unreleased / In Development] - Heavy Autonomous Development
 
+### Keep Going Increment (post Phase1+2+3 initial)
+- Multi-frame vision wiring: ScreenCaptureService now maintains a recent ring buffer (last 3 base64 JPEGs). Panel collects up to 2 and forwards to ollama.generateWithImages for richer llava context on a single generation. Clear helper + contact switch safety.
+- Persistent + UI-controllable skill toggles: 4 new boolean DataStore keys + Flows + setters in SettingsRepository. SkillRegistry gained configureEnabled(Map). SettingsScreen now has a full "Agent Skills" section with live Switches + descriptions. Toggles take effect on next Generate (registry reconfigured in panel).
+- MemoryUpdateSuggester now has real effect: AgentResult carries memorySuggestions, panel surfaces 💾 card with "Apply to memory for this contact" button. New appendNote() on RelationshipMemoryManager does non-destructive append (with length guard).
+- Agent reasoning display upgraded: the 🧠 card is tappable and opens a scrollable AlertDialog ("Why this reply?") showing the complete enrichedAnalysis (analysis + all skill notes). Better transparency into the hierarchical process.
+- 3 new pure JVM unit tests (DeceptionFlagSkillTest, MemoryUpdateSuggesterTest, SkillRegistryTest) exercising flag detection, suggestion heuristics, and enable/disable configuration. Follows existing junit+mockito-kotlin style in the project.
+- Fastlane: new 101.txt changelog entry, substantially expanded full_description.txt covering the agent, all 4 skills, multi vision, toggles, and local-first value prop.
+- Small robustness: vision polling now checks the multi buffer too; panel configures registry from repo snapshot before every orchestrator.generateReply; legacy relationship_updater references cleaned in default sets.
+- All work stays under existing com.emh.app package; no breaking changes to prior flows.
+
+Continue autonomous hardening + device validation loop.
+
 ### Testing & Hardening Phase - Continuing Until Finished (Autonomous)
 - Fixed critical syntax error in EmotionalPromptEngine (parseResponse now correctly inside class)
 - Strengthened vision prompt instructions (explicit "you can see the image", more visual references)

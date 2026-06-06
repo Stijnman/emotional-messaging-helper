@@ -25,7 +25,8 @@ class EmotionalAgentOrchestrator(
         val suggestedReply: String,
         val reasoning: String = "",
         val invokedSkills: List<String> = emptyList(),
-        val suggestedToneAdjustment: String? = null
+        val suggestedToneAdjustment: String? = null,
+        val memorySuggestions: List<String> = emptyList()   // surfaced from MemoryUpdateSuggester for UI apply
     )
 
     /**
@@ -62,17 +63,24 @@ class EmotionalAgentOrchestrator(
             agentAnalysis = analysisAndPlan
         )
 
-        // Step 3: Skill invocation using the registry (clean v1)
+        // Step 3: Skill invocation using the registry (clean v1). Registry must be pre-configured by caller (panel) with persisted enables.
         val skillNotes = skillRegistry.runEnabledSkills(context)
-        val invoked = skillNotes.mapNotNull { note ->
+
+        val invoked = mutableListOf<String>()
+        val memSuggestions = mutableListOf<String>()
+        skillNotes.forEach { note ->
             when {
-                note.contains("deception", ignoreCase = true) || note.contains("pattern", ignoreCase = true) -> "deception_flag"
-                note.contains("tone", ignoreCase = true) || note.contains("anger", ignoreCase = true) || note.contains("sad", ignoreCase = true) -> "tone_analyzer"
-                note.contains("vulnerab", ignoreCase = true) || note.contains("empathy", ignoreCase = true) -> "empathy_booster"
-                note.contains("memory", ignoreCase = true) || note.contains("update", ignoreCase = true) -> "memory_update"
-                else -> null
+                note.contains("deception", ignoreCase = true) || note.contains("pattern", ignoreCase = true) -> invoked.add("deception_flag")
+                note.contains("tone", ignoreCase = true) || note.contains("anger", ignoreCase = true) || note.contains("sad", ignoreCase = true) -> invoked.add("tone_analyzer")
+                note.contains("vulnerab", ignoreCase = true) || note.contains("empathy", ignoreCase = true) -> invoked.add("empathy_booster")
+                note.contains("memory", ignoreCase = true) || note.contains("update", ignoreCase = true) || note.contains("Suggested memory", ignoreCase = true) -> {
+                    invoked.add("memory_update")
+                    // Extract a clean suggestion string for one-click apply in UI
+                    val clean = note.substringAfter("Suggested memory update:", note).trim()
+                    if (clean.isNotBlank()) memSuggestions.add(clean)
+                }
             }
-        }.distinct()
+        }
 
         // Incorporate skill notes into reasoning for the final prompt
         val enrichedAnalysis = if (skillNotes.isNotEmpty()) {
@@ -82,17 +90,12 @@ class EmotionalAgentOrchestrator(
         // Re-generate final reply with enriched analysis (skills influence the output)
         val finalReplyWithSkills = promptEngine.generateEmotionalReply(context, enrichedAnalysis)
 
-        // Optional side effect for relationship updater (non-destructive)
-        if (skillRegistry.isEnabled("relationship_updater")) {
-            skillRegistry.suggestRelationshipUpdate(contactKey, incomingMessage, memoryManager)
-            if (!invoked.contains("relationship_updater")) invoked.add("relationship_updater")
-        }
-
         return AgentResult(
             suggestedReply = finalReplyWithSkills,
             reasoning = enrichedAnalysis,
-            invokedSkills = invoked,
-            suggestedToneAdjustment = null // Future: agent can recommend tone change
+            invokedSkills = invoked.distinct(),
+            suggestedToneAdjustment = null, // Future: agent can recommend tone change
+            memorySuggestions = memSuggestions.distinct()
         )
     }
 }
