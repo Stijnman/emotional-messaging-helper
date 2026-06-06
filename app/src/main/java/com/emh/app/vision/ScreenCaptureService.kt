@@ -109,10 +109,11 @@ class ScreenCaptureService : Service() {
                 val cropped = Bitmap.createBitmap(bitmap, 0, 0, width, height)
 
                 // Convert to base64 JPEG for Ollama vision (using improved helper)
+                // Phase 3: Use dynamic quality
                 val base64Image = ScreenshotHelper.bitmapToBase64(cropped, ScreenshotHelper.getRecommendedQuality())
 
-                // Store for the floating panel to pick up
-                LastScreenshot.base64 = base64Image
+                // Store for the floating panel to pick up (standardized name)
+                lastScreenshotBase64 = base64Image
 
                 android.util.Log.d("EMH", "Screenshot captured and ready for vision: ${cropped.width}x${cropped.height}")
 
@@ -142,9 +143,9 @@ class ScreenCaptureService : Service() {
     override fun onBind(intent: Intent?): IBinder? = null
 
     companion object {
-        /** Simple in-memory holder for the last captured screenshot (base64 JPEG). */
-        object LastScreenshot {
-            var base64: String? = null
-        }
+        /** Standardized holder for the last captured screenshot base64 (JPEG for Ollama vision).
+         * Used by EmotionalPanel and others.
+         */
+        var lastScreenshotBase64: String? = null
     }
 }
