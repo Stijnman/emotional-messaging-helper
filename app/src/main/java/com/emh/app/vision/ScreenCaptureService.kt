@@ -109,8 +109,9 @@ class ScreenCaptureService : Service() {
                 val cropped = Bitmap.createBitmap(bitmap, 0, 0, width, height)
 
                 // Convert to base64 JPEG for Ollama vision (using improved helper)
-                // Phase 3: Use dynamic quality for better mobile performance; support multi-frame in future.
-                val quality = ScreenshotHelper.getRecommendedQuality() // can extend for onMobileData
+                // Dynamic quality (Phase 3) + multi-frame via ring buffer (see getRecentVisionBase64).
+                val quality = ScreenshotHelper.getRecommendedQuality() // can extend for onMobileData hint
+
                 val base64Image = ScreenshotHelper.bitmapToBase64(cropped, quality)
 
                 // Store for the floating panel to pick up (standardized name)

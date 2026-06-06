@@ -18,6 +18,7 @@ class SkillRegistry {
     private val toneSkill = ToneAnalyzerSkill
     private val empathySkill = EmpathyBoosterSkill
     private val memoryUpdateSkill = MemoryUpdateSuggester
+    private val conflictSkill = ConflictDeescalatorSkill  // 5th skill (Phase 3 hardening)
 
     /** Configure enables from persisted settings (called before agent runs). */
     fun configureEnabled(enables: Map<String, Boolean>) {
@@ -86,6 +87,10 @@ class SkillRegistry {
         }
         if (isEnabled("memory_update")) {
             val res = memoryUpdateSkill.run(context)
+            if (res.isNotBlank()) results.add(res)
+        }
+        if (isEnabled("conflict_deescalator")) {
+            val res = conflictSkill.run(context)
             if (res.isNotBlank()) results.add(res)
         }
         return results

@@ -45,11 +45,12 @@ fun EmotionalPanel(
     var agentReasoning by remember { mutableStateOf("") }
     var agentSkillsUsed by remember { mutableStateOf(emptyList<String>()) }
 
-    // Memory suggestion surfaced from MemoryUpdateSuggester skill (user can apply)
-    var memorySuggestion by remember { mutableStateOf("") }
+    // Memory suggestions surfaced from MemoryUpdateSuggester skill (list supports multiple; user can apply)
+    var memorySuggestions by remember { mutableStateOf(emptyList<String>()) }
 
-    // Full reasoning dialog (improved "Why this reply?" UX)
+    // Full reasoning dialog + inline expand (improved "Why this reply?" UX)
     var showFullReasoning by remember { mutableStateOf(false) }
+    var reasoningExpanded by remember { mutableStateOf(false) }
 
     // Auto-clear vision when contact changes (smart behavior)
     var lastContact by remember { mutableStateOf(contactKey) }
@@ -264,8 +265,8 @@ fun EmotionalPanel(
 
                         agentReasoning = agentResult.reasoning
                         agentSkillsUsed = agentResult.invokedSkills
-                        // Surface memory suggestion for one-click apply (if the skill produced one)
-                        memorySuggestion = agentResult.memorySuggestions.firstOrNull() ?: ""
+                        // Surface memory suggestions (list) for apply UX
+                        memorySuggestions = agentResult.memorySuggestions
 
                         val finalPrompt = agentResult.suggestedReply  // enriched prompt from agent
 
@@ -291,7 +292,8 @@ fun EmotionalPanel(
                             // Clear vision buffers (single + multi) after consumption
                             com.emh.app.vision.ScreenCaptureService.clearVisionBuffers()
                             visionAttached = false
-                            memorySuggestion = ""
+                            memorySuggestions = emptyList()
+                            reasoningExpanded = false
                         }.onFailure { error ->
                             emotionalInsight = when {
                                 error.message?.contains("timeout", ignoreCase = true) == true ->
@@ -341,28 +343,38 @@ fun EmotionalPanel(
             Text(emotionalInsight, style = MaterialTheme.typography.bodyMedium)
         }
 
-        // Phase 2+: Display agent reasoning and skills. Clickable for full "Why this reply?" view.
+        // Phase 2+: Display agent reasoning and skills. Clickable + expandable for full "Why this reply?" view.
         if (agentReasoning.isNotBlank() || agentSkillsUsed.isNotEmpty()) {
             Spacer(Modifier.height(12.dp))
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
-                ),
-                onClick = { showFullReasoning = true }
+                )
             ) {
                 Column(Modifier.padding(12.dp)) {
                     Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
                         Text("🧠 Agent Analysis", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
                         Spacer(Modifier.weight(1f))
-                        Text("tap for full reasoning →", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        TextButton(onClick = { showFullReasoning = true }) {
+                            Text("Full dialog", style = MaterialTheme.typography.labelSmall)
+                        }
                     }
                     if (agentReasoning.isNotBlank()) {
+                        val displayText = if (reasoningExpanded) agentReasoning else (agentReasoning.take(260) + if (agentReasoning.length > 260) "..." else "")
                         Text(
-                            agentReasoning.take(280) + if (agentReasoning.length > 280) "..." else "",
+                            displayText,
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
+                        if (agentReasoning.length > 260) {
+                            TextButton(onClick = {
+                                reasoningExpanded = !reasoningExpanded
+                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            }) {
+                                Text(if (reasoningExpanded) "Collapse" else "Expand analysis")
+                            }
+                        }
                     }
                     if (agentSkillsUsed.isNotEmpty()) {
                         Spacer(Modifier.height(6.dp))
@@ -372,27 +384,40 @@ fun EmotionalPanel(
                             color = MaterialTheme.colorScheme.tertiary
                         )
                     }
+                    // Quick actions
+                    Row {
+                        OutlinedButton(onClick = {
+                            val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                            clipboard.setPrimaryClip(android.content.ClipData.newPlainText("EMH Agent Reasoning", agentReasoning))
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        }) {
+                            Text("Copy analysis")
+                        }
+                    }
                 }
             }
         }
 
-        // Memory suggestion apply UI (from MemoryUpdateSuggester skill) - one click persist
-        if (memorySuggestion.isNotBlank()) {
+        // Memory suggestions apply UI (from MemoryUpdateSuggester) - supports multiple, one-tap append all
+        if (memorySuggestions.isNotEmpty()) {
             Spacer(Modifier.height(8.dp))
             Card(
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
             ) {
                 Column(Modifier.padding(12.dp)) {
-                    Text("💾 Suggested memory update", style = MaterialTheme.typography.labelMedium)
-                    Text(memorySuggestion, style = MaterialTheme.typography.bodySmall)
+                    Text("💾 Suggested memory updates (${memorySuggestions.size})", style = MaterialTheme.typography.labelMedium)
+                    memorySuggestions.forEach { sug ->
+                        Text("• $sug", style = MaterialTheme.typography.bodySmall)
+                    }
                     Spacer(Modifier.height(6.dp))
                     Button(onClick = {
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        app.memoryManager.appendNote(contactKey, memorySuggestion)
-                        statusMessage = "Memory note saved for $contactKey"
-                        memorySuggestion = ""
+                        val joined = memorySuggestions.joinToString(" | ")
+                        app.memoryManager.appendNote(contactKey, joined)
+                        statusMessage = "Memory notes saved for $contactKey"
+                        memorySuggestions = emptyList()
                     }) {
-                        Text("Apply to memory for this contact")
+                        Text("Apply these notes to memory")
                     }
                 }
             }

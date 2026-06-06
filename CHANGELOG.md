@@ -2,6 +2,15 @@
 
 ## [Unreleased / In Development] - Heavy Autonomous Development
 
+### Continue Round (5th skill, UI hardening, F-Droid prep)
+- New skill: ConflictDeescalatorSkill (id: conflict_deescalator). Detects blame/escalation/withdrawal language and returns concrete de-escalation guidance ("I feel...", pause, validation first). Fully wired: Settings toggle (persisted), SkillRegistry, orchestrator invoked mapping, panel display.
+- Now 5 skills total, all controllable live via Settings + DataStore.
+- Agent UI improvements: memory suggestions render as bulleted list (multi support) with single "Apply these notes" action. Reasoning card now has inline Expand/Collapse for the full analysis text + "Copy analysis" button + "Full dialog" quick link (keeps the rich AlertDialog).
+- Added EmotionalAgentOrchestratorTest (mocks the three collaborators, asserts enrichment, memorySuggestions extraction, history passing, invoked skill names).
+- Fastlane/F-Droid prep: graphics/ + phoneScreenshots/ with detailed placeholder .txt files + capture instructions. fdroid/metadata/com.emh.app/ skeleton (summary, description, categories, license).
+- New changelog 102.txt. Cleaned outdated "stub/future" comments now that multi-frame vision + skill config are production paths.
+- Docs updates across README, CHANGELOG, architecture.
+
 ### Keep Going Increment (post Phase1+2+3 initial)
 - Multi-frame vision wiring: ScreenCaptureService now maintains a recent ring buffer (last 3 base64 JPEGs). Panel collects up to 2 and forwards to ollama.generateWithImages for richer llava context on a single generation. Clear helper + contact switch safety.
 - Persistent + UI-controllable skill toggles: 4 new boolean DataStore keys + Flows + setters in SettingsRepository. SkillRegistry gained configureEnabled(Map). SettingsScreen now has a full "Agent Skills" section with live Switches + descriptions. Toggles take effect on next Generate (registry reconfigured in panel).

@@ -43,6 +43,18 @@ Record these flows on a real device with Ollama + llava running for high-quality
 3. Panel shows gentle flag + alternative strategy.
 4. User can accept/override.
 
+## Flow 5: Skills Toggle + Memory Apply + Full Agent Reasoning (Phase 2/3)
+
+1. Go to Settings (from MainActivity or panel) and toggle off "Deception Flag" and on "Conflict De-escalator".
+2. Receive a charged escalation message in WhatsApp ("You always make me so angry...").
+3. In panel, note that only enabled skills run (ConflictDeescalatorSkill should fire).
+4. After Generate: observe the 🧠 Agent Analysis card. Tap "Expand analysis" or "Full dialog" to see the complete enriched reasoning (including which skills contributed).
+5. If MemoryUpdateSuggester (or others) produced notes, a 💾 "Suggested memory updates" card appears with bullets.
+6. Tap "Apply these notes to memory" — verify later via the memory vault or by checking buildContextForAI behavior on next interaction.
+7. Copy the analysis for your own notes or to share (dev).
+
+**Expected:** Different skill mix produces visibly different insight depth. Memory append is non-destructive and visible in future context.
+
 ## Recording Tips
 
 - Use Android Studio screen recorder or `adb shell screenrecord`.
@@ -50,5 +62,6 @@ Record these flows on a real device with Ollama + llava running for high-quality
 - Capture haptics (sound + vibration) on generate/paste.
 - Show Ollama logs in terminal for transparency ("local only").
 - Keep videos short (15–45s) per flow.
+- For skills/memory flows, also briefly show the Settings toggles screen.
 
 Update this file with actual links/GIFs once recorded.

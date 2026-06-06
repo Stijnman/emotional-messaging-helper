@@ -14,7 +14,7 @@ Android floating overlay app for WhatsApp that provides psychologically intellig
 | Screenshot Vision Context    | Capture screen + analyze with vision models |
 | Tone & Figurative Control    | 0-10 figurative slider + quick tone presets |
 | Encrypted Relationship Memory| Per-contact notes & preferences (vault) |
-| Extensible Skill System      | Lightweight skills for tone analysis, deception flags, memory updates (Phase 2) |
+| Extensible Skill System      | 5 lightweight skills (tone, deception, empathy, memory updates, conflict de-escalation) — all toggleable (Phase 2/3) |
 | History + Restore            | Save generations, search, one-tap restore into panel |
 | Smart Auto-Paste             | Direct accessibility paste + reliable clipboard fallback + haptics/toasts |
 | Floating Overlay Panel       | Rich Compose UI with haptics, templates, vision UI |
@@ -35,7 +35,9 @@ graph TD
     J --> K[Clipboard + Accessibility paste]
 ```
 
-See `docs/architecture.md` (to be added) for full details.
+See `docs/architecture.md` for full details (includes Mermaid of the agent + skills loop + multi-frame vision).
+
+**Latest autonomous progress**: 5 skills with live Settings toggles, multi-frame vision (up to 2 images to llava), one-tap memory suggestion application, expandable + copyable agent reasoning, new orchestrator tests, fastlane graphics + fdroid metadata skeletons. All on `feature/phase2-agent-skills`.
 
 ## Quick Start (One-Click Ollama)
 
@@ -56,7 +58,7 @@ Then open the project in **Android Studio**, sync, and run on a physical device.
 
 | App                  | Local AI | Vision | Emotional Depth | Skills/Extensibility | Relationship Memory | Open Source |
 |----------------------|----------|--------|-----------------|----------------------|---------------------|-------------|
-| EMH (this)           | ✅ Yes  | ✅ llava | ✅ Hierarchical Agent + Psychologist | ✅ Planned v1 | ✅ Encrypted Vault | ✅ MIT     |
+| EMH (this)           | ✅ Yes  | ✅ llava (multi-frame) | ✅ Hierarchical Agent + 5 Skills (configurable) | ✅ Live + persisted toggles | ✅ Encrypted Vault + apply UX | ✅ Apache-2.0     |
 | Replyfy / AutoResponder | ❌     | ❌     | 🟡 Basic templates | ❌                  | ❌                 | ❌         |
 | Generic Ollama apps  | ✅      | 🟡 Limited | 🟡 Single-shot | ❌                  | 🟡 Basic           | Varies     |
 

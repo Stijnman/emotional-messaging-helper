@@ -50,8 +50,8 @@ object ScreenshotHelper {
     }
 
     /**
-     * Phase 3: Placeholder for multi-frame vision support.
-     * Future: accept list of Bitmaps (e.g. last 2-3 screenshots) and combine descriptions.
+     * Multi-frame helper (Phase 3 implemented). Used by callers that have raw Bitmaps.
+     * The active path (ScreenCaptureService ring buffer + panel) works with already-encoded base64.
      */
     fun bitmapsToBase64Multi(bitmaps: List<Bitmap>, quality: Int = 70): List<String> {
         return bitmaps.map { bitmapToBase64(it, quality) }

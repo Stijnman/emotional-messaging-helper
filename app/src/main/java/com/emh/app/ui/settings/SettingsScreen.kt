@@ -121,6 +121,7 @@ fun SettingsScreen() {
         var skillTone by remember { mutableStateOf(true) }
         var skillEmpathy by remember { mutableStateOf(true) }
         var skillMemory by remember { mutableStateOf(true) }
+        var skillConflict by remember { mutableStateOf(true) }
 
         LaunchedEffect(Unit) {
             repo.skillDeceptionEnabled.collect { skillDeception = it }
@@ -133,6 +134,9 @@ fun SettingsScreen() {
         }
         LaunchedEffect(Unit) {
             repo.skillMemoryEnabled.collect { skillMemory = it }
+        }
+        LaunchedEffect(Unit) {
+            repo.skillConflictEnabled.collect { skillConflict = it }
         }
 
         Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
@@ -167,6 +171,14 @@ fun SettingsScreen() {
                 Text("Proposes non-destructive notes (preferences/events) you can apply", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
+        Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+            Switch(checked = skillConflict, onCheckedChange = { skillConflict = it })
+            Spacer(Modifier.width(8.dp))
+            Column {
+                Text("Conflict De-escalator")
+                Text("Detects escalation/blame and recommends calm 'I feel' + validation-first tactics", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        }
 
         Spacer(Modifier.height(32.dp))
 
@@ -179,6 +191,7 @@ fun SettingsScreen() {
                 repo.setSkillToneEnabled(skillTone)
                 repo.setSkillEmpathyEnabled(skillEmpathy)
                 repo.setSkillMemoryEnabled(skillMemory)
+                repo.setSkillConflictEnabled(skillConflict)
             }
         }) {
             Text("Save Settings")

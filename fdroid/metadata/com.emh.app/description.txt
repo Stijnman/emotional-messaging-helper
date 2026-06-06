@@ -1,0 +1,17 @@
+Emotional Messaging Helper (EMH) runs entirely on your device using local Ollama models (text + vision).
+
+It watches WhatsApp via Accessibility, pops a rich floating Compose panel, and uses a Hierarchical Emotional Agent + pluggable skills to craft psychologically intelligent replies.
+
+Key features:
+- Hierarchical Agent: analysis, strategy planning, skill insights, enriched final generation
+- 5 skills (all user-toggleable in Settings): Deception/Pattern detection, Tone analysis, Empathy booster, Memory update suggester, Conflict de-escalator
+- Real screenshot vision context (MediaProjection + multi-frame support sent to llava)
+- Encrypted per-contact memory vault (with export)
+- Recent chat history for multi-turn awareness
+- Strong privacy: everything stays local
+
+Perfect when you want thoughtful, context-aware, non-generic replies without sending your conversations to any cloud service.
+
+Open in Android Studio, run the setup-ollama.sh script, and test on a physical device with WhatsApp + Ollama running.
+
+Apache-2.0 / community friendly. 

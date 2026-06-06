@@ -21,7 +21,7 @@ It uses AccessibilityService for real-time message detection, MediaProjection fo
   - OllamaClient: Communicates with local Ollama (text + images).
   - EmotionalPromptEngine: Builds rich prompts with memory, tone, figurative level, vision.
   - EmotionalAgentOrchestrator (Phase 2): Hierarchical agent for analysis, planning, skill invocation.
-  - Skills: Pluggable modules for deception detection, tone analysis, empathy boost, memory suggestions.
+  - Skills: Pluggable modules (currently 5: deception, tone, empathy, memory suggester, conflict de-escalator) with per-skill persisted toggles.
 
 - **Memory**:
   - RelationshipMemoryManager: Encrypted per-contact notes and preferences using EncryptedSharedPreferences.
@@ -90,7 +90,8 @@ flowchart TD
     K -.->|tone_analyzer| S[ToneAnalyzerSkill]
     K -.->|empathy_booster| T[EmpathyBoosterSkill]
     K -.->|memory_update| U[MemoryUpdateSuggester]
+    K -.->|conflict_deescalator| V[ConflictDeescalatorSkill]
 ```
 
-Skills return short insight strings that are appended to reasoning and re-injected. All processing stays on-device. Toggles in Settings control which K branches execute.
+Skills (5 total) return short insight strings that are appended to reasoning and re-injected. All processing stays on-device. Toggles in Settings (DataStore) control which K branches execute and are live-configured via SkillRegistry before every agent run. Multi-frame vision images (up to recent 2) are forwarded directly to the final vision LLM call.
 

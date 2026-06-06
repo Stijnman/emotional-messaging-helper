@@ -25,6 +25,7 @@ class SettingsRepository(private val context: Context) {
         val SKILL_TONE = booleanPreferencesKey("skill_tone_enabled")
         val SKILL_EMPATHY = booleanPreferencesKey("skill_empathy_enabled")
         val SKILL_MEMORY = booleanPreferencesKey("skill_memory_enabled")
+        val SKILL_CONFLICT = booleanPreferencesKey("skill_conflict_enabled")  // 5th skill: ConflictDeescalator
     }
 
     val ollamaUrl: Flow<String> = context.dataStore.data.map { prefs ->
@@ -71,6 +72,9 @@ class SettingsRepository(private val context: Context) {
     val skillMemoryEnabled: Flow<Boolean> = context.dataStore.data.map { prefs ->
         prefs[Keys.SKILL_MEMORY] ?: true
     }
+    val skillConflictEnabled: Flow<Boolean> = context.dataStore.data.map { prefs ->
+        prefs[Keys.SKILL_CONFLICT] ?: true
+    }
 
     suspend fun setSkillDeceptionEnabled(enabled: Boolean) {
         context.dataStore.edit { it[Keys.SKILL_DECEPTION] = enabled }
@@ -84,6 +88,9 @@ class SettingsRepository(private val context: Context) {
     suspend fun setSkillMemoryEnabled(enabled: Boolean) {
         context.dataStore.edit { it[Keys.SKILL_MEMORY] = enabled }
     }
+    suspend fun setSkillConflictEnabled(enabled: Boolean) {
+        context.dataStore.edit { it[Keys.SKILL_CONFLICT] = enabled }
+    }
 
     /** Snapshot of current skill enables (call from suspend context before agent runs). */
     suspend fun getSkillEnables(): Map<String, Boolean> = try {
@@ -91,14 +98,16 @@ class SettingsRepository(private val context: Context) {
             "deception_flag" to skillDeceptionEnabled.first(),
             "tone_analyzer" to skillToneEnabled.first(),
             "empathy_booster" to skillEmpathyEnabled.first(),
-            "memory_update" to skillMemoryEnabled.first()
+            "memory_update" to skillMemoryEnabled.first(),
+            "conflict_deescalator" to skillConflictEnabled.first()
         )
     } catch (_: Exception) {
         mapOf(
             "deception_flag" to true,
             "tone_analyzer" to true,
             "empathy_booster" to true,
-            "memory_update" to true
+            "memory_update" to true,
+            "conflict_deescalator" to true
         )
     }
 }

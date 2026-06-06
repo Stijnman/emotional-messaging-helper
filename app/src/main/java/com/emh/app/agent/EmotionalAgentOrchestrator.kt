@@ -79,6 +79,7 @@ class EmotionalAgentOrchestrator(
                     val clean = note.substringAfter("Suggested memory update:", note).trim()
                     if (clean.isNotBlank()) memSuggestions.add(clean)
                 }
+                note.contains("conflict", ignoreCase = true) || note.contains("escalat", ignoreCase = true) || note.contains("de-escalat", ignoreCase = true) -> invoked.add("conflict_deescalator")
             }
         }
 
