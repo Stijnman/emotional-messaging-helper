@@ -2,7 +2,14 @@
 
 ## [Unreleased / In Development] - Heavy Autonomous Development
 
-### Systematic Closeout of Remaining Areas (ROADMAP-driven)
+### YOLO Gemma + Final Closeout (ROADMAP-driven)
+- **Gemma support YOLO'd**: 
+  - OllamaClient now recommends and detects Gemma 3/4 models (gemma3:4b, gemma4:e2b/e4b etc.) as first-class options. These are multimodal (vision for screenshots), lightweight/edge-optimized, and pair excellently with the hierarchical agent + 5 skills.
+  - SettingsScreen has prominent "Quick model picks" with Gemma chips + on-device tip (Google AI Edge Gallery for phone-only Gemma 4 right now; MediaPipe planned).
+  - Updated Ollama vision detection, suggest logic, SETUP.md, README (with existing demo images), ROADMAP.md, TESTING.md.
+  - True on-device research integrated: Edge Gallery for instant testing, official path to native on-device inference without external Ollama server.
+- All previous closeout items (ROADMAP/TESTING creation, memory UI, vision hardening, bottom sheet, agent toggle, version 0.3.0, fdroid, legacy cleanup, docs/images) remain complete.
+- This was executed in "YOLO it" mode per user request — bold, practical integration of Google's excellent on-device-friendly models while keeping the flexible Ollama backend.
 - Created `ROADMAP.md` with full gap analysis vs the original pasted implementation plan (Phase 1/2/3 + testing checklist).
 - All remaining areas are now being addressed **one by one** until complete (memory export UI, vision hardening, bottom sheet reasoning, legacy cleanup, testing, F-Droid prep, final docs, etc.).
 - Updated README, architecture.md, and this changelog to accurately reflect Phase status and point to the new roadmap.

@@ -98,6 +98,44 @@ fun SettingsScreen() {
             Spacer(Modifier.height(8.dp))
         }
 
+        // YOLO Gemma support: Quick recommended picks (Ollama + on-device notes)
+        Spacer(Modifier.height(8.dp))
+        Text("Quick model picks (Ollama)", style = MaterialTheme.typography.labelMedium)
+        Text(
+            "Gemma 3/4 (Google) are excellent for the agent + skills. Edge variants (e2b/e4b) are optimized for lighter hardware.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Spacer(Modifier.height(4.dp))
+
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            // Gemma recommendations
+            OllamaClient.RECOMMENDED_GEMMA_MODELS.forEach { (m, desc) ->
+                FilterChip(
+                    selected = model == m,
+                    onClick = { model = m },
+                    label = { Text(m) }
+                )
+            }
+            // Strong Llama fallback
+            FilterChip(
+                selected = model == "llama3.2",
+                onClick = { model = "llama3.2" },
+                label = { Text("llama3.2") }
+            )
+            FilterChip(
+                selected = model.startsWith("llava"),
+                onClick = { model = "llava" },
+                label = { Text("llava (vision)") }
+            )
+        }
+
+        Text(
+            "Tip: For true on-device (no PC Ollama): Try Google AI Edge Gallery app (downloads Gemma 4 directly on phone). Future: native MediaPipe integration.",
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
         Spacer(Modifier.height(16.dp))
 
         Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {

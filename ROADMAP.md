@@ -114,6 +114,11 @@ Original checklist items that still need attention:
 - Dynamic skill loading
 - Full multi-step LLM chain (analysis separate from generation)
 
+**YOLO Gemma (executed during closeout)**: 
+- OllamaClient and Settings now prominently support Gemma 3/4 (gemma3:4b, gemma4:e2b/e4b). These are multimodal, lightweight, and excellent for the hierarchical agent + skills + vision use case.
+- True on-device documented (Google AI Edge Gallery for instant testing, MediaPipe LLM Inference for native integration).
+- This was "YOLO'd" as a high-ROI addition for privacy, performance on mobile, and differentiation vs Llama-only setups.
+
 ## Original Testing Checklist (from implementation plan) — Current State
 
 1. Unit tests for agent + skills → Partial (several added; expand further)

@@ -14,7 +14,7 @@ Run with: `./gradlew test` (in Android Studio after sync).
 1. **Unit tests for agent + skills** — Done (multiple added during closeout)
 2. **Physical device: WhatsApp overlay detection stable** — Code complete. Pending real-device run.
 3. **Paste stable** (direct Accessibility ACTION_PASTE + clipboard fallback + Toast + vibration on all paths) — Code complete + manual retry buttons. Pending confirmation.
-4. **Ollama + vision reliable** (llama3.2 + llava, dynamic quality, multi-frame 2+ frames sent) — Code complete (ring buffer + in-session multi acquire + images passed to context). Pending device + llava test.
+4. **Ollama + vision reliable** (llama3.2 + llava + YOLO Gemma 3/4 multimodal e.g. gemma3:4b / gemma4:e4b, dynamic quality, multi-frame) — Code complete. Also testable via Google AI Edge Gallery for true on-device Gemma. Pending device confirmation with Gemma variants.
 5. **Memory export/import** — Backend + full UI in Settings (export all to clipboard, import by paste). Pending device test.
 6. **Agent produces deeper, context-aware replies** (multi-turn history last-3 + memory + 5 skills) — Core complete. Reasoning UI (bottom sheet + expand + copy) makes the "why" transparent.
 7. **Skills can be enabled/disabled and visibly affect output** — Full persisted toggles + live configure before generate. Global "Use Hierarchical Agent" toggle also added.

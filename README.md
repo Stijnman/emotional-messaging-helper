@@ -52,7 +52,7 @@ graph TD
 
 See `docs/architecture.md` for full details (includes Mermaid of the agent + skills loop + multi-frame vision).
 
-**Latest autonomous progress**: 5 skills with live Settings toggles, multi-frame vision (up to 2 images to llava), one-tap memory suggestion application, expandable + copyable agent reasoning, new orchestrator tests, fastlane graphics + fdroid metadata skeletons. All on `feature/phase2-agent-skills`.
+**Latest autonomous progress (YOLO Gemma)**: 5 skills + global agent toggle, multi-frame vision, memory export UI in Settings, bottom-sheet reasoning, full ROADMAP/TESTING/docs with images, **Gemma 3/4 support** (via Ollama — recommended `gemma3:4b` / edge `gemma4:e2b` for on-device-friendly use). True on-device path documented (Google AI Edge Gallery + future MediaPipe). All on `feature/phase2-agent-skills`.
 
 ## Quick Start (One-Click Ollama)
 
@@ -61,9 +61,12 @@ cd emotional-messaging-helper
 ./scripts/setup-ollama.sh
 ```
 
-This pulls the recommended models:
-- `llama3.2:3b` (or llama3.1)
-- `llava:7b` (vision)
+This pulls recommended models. YOLO Gemma edition:
+- `gemma3:4b` or `gemma4:e4b` (strong reasoning + multimodal vision for screenshots — great for the agent)
+- `gemma4:e2b` (lightest edge model)
+- Or stick with `llama3.2` + `llava`
+
+Gemma models are officially excellent with Ollama and optimized for edge/on-device use. See SETUP.md for on-device options (Google AI Edge Gallery).
 
 Then open the project in **Android Studio**, sync, and run on a physical device.
 
