@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.3] - 2026-06-24
+
+### Fixed
+- **Floating overlay crash**: `FloatingOverlayService` now extends `LifecycleService` and sets `ViewTreeLifecycleOwner` on the overlay `ComposeView` (fixes `ViewTreeLifecycleOwner not found` crash on demo panel and WhatsApp overlay).
+- **Model name sanitization**: strips stray `*` / whitespace from saved Ollama model names (e.g. `*gemma3:4b` → `gemma3:4b`).
+- **Generate path**: text-only generation now uses the same `effectiveModel` as vision mode.
+
 ## [0.3.1] - 2026-06-24 — Project Complete
 
 ### Added

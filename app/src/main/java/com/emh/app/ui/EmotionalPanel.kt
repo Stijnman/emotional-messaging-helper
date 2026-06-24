@@ -361,7 +361,7 @@ fun EmotionalPanel(
                         val result = if (willUseVision && imagesForVision.isNotEmpty()) {
                             ollama.generateWithImages(effectiveModel, finalPrompt, imagesForVision)
                         } else {
-                            ollama.generate(currentModel, finalPrompt)
+                            ollama.generate(effectiveModel, finalPrompt)
                         }
 
                         result.onSuccess { raw ->

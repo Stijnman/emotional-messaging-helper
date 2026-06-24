@@ -37,7 +37,7 @@ class SettingsRepository(private val context: Context) {
     }
 
     val defaultModel: Flow<String> = context.dataStore.data.map { prefs ->
-        prefs[Keys.DEFAULT_MODEL] ?: "llama3.2"
+        sanitizeModelName(prefs[Keys.DEFAULT_MODEL] ?: "llama3.2")
     }
 
     val autoAnalyze: Flow<Boolean> = context.dataStore.data.map { prefs ->
@@ -49,7 +49,12 @@ class SettingsRepository(private val context: Context) {
     }
 
     suspend fun setDefaultModel(model: String) {
-        context.dataStore.edit { it[Keys.DEFAULT_MODEL] = model }
+        context.dataStore.edit { it[Keys.DEFAULT_MODEL] = sanitizeModelName(model) }
+    }
+
+    private fun sanitizeModelName(model: String): String {
+        val cleaned = model.trim().trimStart('*', '#', '-', ' ')
+        return cleaned.ifBlank { "llama3.2" }
     }
 
     suspend fun setAutoAnalyze(enabled: Boolean) {

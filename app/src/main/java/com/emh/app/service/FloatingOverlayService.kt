@@ -3,7 +3,6 @@ package com.emh.app.service
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.graphics.PixelFormat
@@ -15,13 +14,15 @@ import android.view.WindowManager
 import android.widget.Toast
 import androidx.compose.ui.platform.ComposeView
 import androidx.core.app.NotificationCompat
+import androidx.lifecycle.LifecycleService
+import androidx.lifecycle.setViewTreeLifecycleOwner
 import com.emh.app.R
 import com.emh.app.ui.EmotionalPanel
 
 /**
  * Floating emotional assistant panel that appears over WhatsApp.
  */
-class FloatingOverlayService : Service() {
+class FloatingOverlayService : LifecycleService() {
 
     private lateinit var windowManager: WindowManager
     private var floatingView: ComposeView? = null
@@ -34,6 +35,8 @@ class FloatingOverlayService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        super.onStartCommand(intent, flags, startId)
+
         val contact = intent?.getStringExtra(EXTRA_CONTACT) ?: "Contact"
         val message = intent?.getStringExtra(EXTRA_MESSAGE) ?: ""
 
@@ -59,6 +62,7 @@ class FloatingOverlayService : Service() {
         }
 
         val composeView = ComposeView(this).apply {
+            setViewTreeLifecycleOwner(this@FloatingOverlayService)
             setContent {
                 EmotionalPanel(
                     contactKey = contactKey,
@@ -166,7 +170,7 @@ class FloatingOverlayService : Service() {
         super.onDestroy()
     }
 
-    override fun onBind(intent: Intent?): IBinder? = null
+    override fun onBind(intent: Intent): IBinder? = super.onBind(intent)
 
     companion object {
         const val EXTRA_CONTACT = "extra_contact"

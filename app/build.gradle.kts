@@ -14,8 +14,8 @@ android {
         minSdk = 26
         //noinspection OldTargetApi
         targetSdk = 35
-        versionCode = 6
-        versionName = "0.3.2" // Settings scroll + WhatsApp overlay hardening
+        versionCode = 7
+        versionName = "0.3.3" // Fix overlay Compose lifecycle crash + model sanitization
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -59,6 +59,7 @@ kotlin {
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.lifecycle.service)
     implementation(libs.androidx.activity.compose)
 
     // Compose
