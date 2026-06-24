@@ -27,6 +27,9 @@ class SettingsRepository(private val context: Context) {
         val SKILL_MEMORY = booleanPreferencesKey("skill_memory_enabled")
         val SKILL_CONFLICT = booleanPreferencesKey("skill_conflict_enabled")  // 5th skill: ConflictDeescalator
         val USE_HIERARCHICAL_AGENT = booleanPreferencesKey("use_hierarchical_agent")  // global master toggle (Phase 2/3 closeout)
+        val VOICE_ENABLED = booleanPreferencesKey("voice_enabled")
+        val AUTO_SPEAK_REPLIES = booleanPreferencesKey("auto_speak_replies")
+        val VOICE_INPUT_ENABLED = booleanPreferencesKey("voice_input_enabled")
     }
 
     val ollamaUrl: Flow<String> = context.dataStore.data.map { prefs ->
@@ -81,6 +84,18 @@ class SettingsRepository(private val context: Context) {
         prefs[Keys.USE_HIERARCHICAL_AGENT] ?: true
     }
 
+    val voiceEnabled: Flow<Boolean> = context.dataStore.data.map { prefs ->
+        prefs[Keys.VOICE_ENABLED] ?: true
+    }
+
+    val autoSpeakReplies: Flow<Boolean> = context.dataStore.data.map { prefs ->
+        prefs[Keys.AUTO_SPEAK_REPLIES] ?: false
+    }
+
+    val voiceInputEnabled: Flow<Boolean> = context.dataStore.data.map { prefs ->
+        prefs[Keys.VOICE_INPUT_ENABLED] ?: true
+    }
+
     suspend fun setSkillDeceptionEnabled(enabled: Boolean) {
         context.dataStore.edit { it[Keys.SKILL_DECEPTION] = enabled }
     }
@@ -99,6 +114,18 @@ class SettingsRepository(private val context: Context) {
 
     suspend fun setUseHierarchicalAgent(enabled: Boolean) {
         context.dataStore.edit { it[Keys.USE_HIERARCHICAL_AGENT] = enabled }
+    }
+
+    suspend fun setVoiceEnabled(enabled: Boolean) {
+        context.dataStore.edit { it[Keys.VOICE_ENABLED] = enabled }
+    }
+
+    suspend fun setAutoSpeakReplies(enabled: Boolean) {
+        context.dataStore.edit { it[Keys.AUTO_SPEAK_REPLIES] = enabled }
+    }
+
+    suspend fun setVoiceInputEnabled(enabled: Boolean) {
+        context.dataStore.edit { it[Keys.VOICE_INPUT_ENABLED] = enabled }
     }
 
     /** Snapshot of current skill enables (call from suspend context before agent runs). */

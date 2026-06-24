@@ -1,6 +1,8 @@
 package com.emh.app
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
@@ -9,12 +11,19 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import com.emh.app.vision.ScreenCaptureManager
 
 class MainActivity : ComponentActivity() {
 
     private val overlayPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
+    ) {
+        checkPermissions()
+    }
+
+    private val micPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
     ) {
         checkPermissions()
     }
@@ -47,6 +56,14 @@ class MainActivity : ComponentActivity() {
             startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
         }
 
+        findViewById<Button>(R.id.btnRequestMic).setOnClickListener {
+            requestMicPermission()
+        }
+
+        findViewById<Button>(R.id.btnOpenSettings).setOnClickListener {
+            startActivity(Intent(this, com.emh.app.ui.settings.SettingsActivity::class.java))
+        }
+
         findViewById<Button>(R.id.btnStartService).setOnClickListener {
             startFloatingService()
         }
@@ -69,10 +86,23 @@ class MainActivity : ComponentActivity() {
 
     private fun checkPermissions() {
         val overlayOk = Settings.canDrawOverlays(this)
-        findViewById<TextView>(R.id.statusOverlay).text =
-            if (overlayOk) "✓ Overlay permission granted" else "✗ Overlay permission needed"
+        val micOk = ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) ==
+            PackageManager.PERMISSION_GRANTED
+        findViewById<TextView>(R.id.statusOverlay).text = buildString {
+            append(if (overlayOk) "✓ Overlay granted" else "✗ Overlay needed")
+            append("\n")
+            append(if (micOk) "✓ Microphone granted (voice enabled)" else "✗ Microphone needed for voice input")
+        }
+    }
 
-        // Accessibility status is harder to check programmatically, so we just guide the user
+    private fun requestMicPermission() {
+        when {
+            ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) ==
+                PackageManager.PERMISSION_GRANTED -> {
+                Toast.makeText(this, "Microphone permission already granted", Toast.LENGTH_SHORT).show()
+            }
+            else -> micPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+        }
     }
 
     private fun requestOverlayPermission() {

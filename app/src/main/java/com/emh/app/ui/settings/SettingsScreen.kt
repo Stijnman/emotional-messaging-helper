@@ -225,6 +225,49 @@ fun SettingsScreen() {
             }
         }
 
+        Spacer(Modifier.height(24.dp))
+
+        Text("Voice", style = MaterialTheme.typography.titleMedium)
+        Text(
+            "Text-to-speech reads replies aloud. Voice input lets you add context by speaking (requires microphone permission).",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Spacer(Modifier.height(8.dp))
+
+        var voiceEnabled by remember { mutableStateOf(true) }
+        var autoSpeak by remember { mutableStateOf(false) }
+        var voiceInput by remember { mutableStateOf(true) }
+
+        LaunchedEffect(Unit) { repo.voiceEnabled.collect { voiceEnabled = it } }
+        LaunchedEffect(Unit) { repo.autoSpeakReplies.collect { autoSpeak = it } }
+        LaunchedEffect(Unit) { repo.voiceInputEnabled.collect { voiceInput = it } }
+
+        Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+            Switch(checked = voiceEnabled, onCheckedChange = { voiceEnabled = it })
+            Spacer(Modifier.width(8.dp))
+            Column {
+                Text("Enable voice (TTS)")
+                Text("Show Speak/Stop on generated replies", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        }
+        Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+            Switch(checked = autoSpeak, onCheckedChange = { autoSpeak = it }, enabled = voiceEnabled)
+            Spacer(Modifier.width(8.dp))
+            Column {
+                Text("Auto-speak replies")
+                Text("Read each new suggestion aloud automatically", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        }
+        Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+            Switch(checked = voiceInput, onCheckedChange = { voiceInput = it }, enabled = voiceEnabled)
+            Spacer(Modifier.width(8.dp))
+            Column {
+                Text("Voice input")
+                Text("Microphone button on the floating panel", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        }
+
         Spacer(Modifier.height(12.dp))
 
         Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
@@ -249,6 +292,9 @@ fun SettingsScreen() {
                 repo.setSkillMemoryEnabled(skillMemory)
                 repo.setSkillConflictEnabled(skillConflict)
                 repo.setUseHierarchicalAgent(useHierarchicalAgent)
+                repo.setVoiceEnabled(voiceEnabled)
+                repo.setAutoSpeakReplies(autoSpeak)
+                repo.setVoiceInputEnabled(voiceInput)
             }
         }) {
             Text("Save Settings")

@@ -2,7 +2,6 @@ package com.emh.app.ui
 
 import android.content.Context
 import android.content.Intent
-import android.speech.tts.TextToSpeech
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -18,15 +17,17 @@ import com.emh.app.ai.EmotionalPromptEngine
 import com.emh.app.ai.OllamaClient
 import com.emh.app.ui.templates.TemplateGallery
 import com.emh.app.utils.AutoPasteHelper
+import com.emh.app.voice.VoiceHelper
 import kotlinx.coroutines.launch
-import java.util.*
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EmotionalPanel(
     contactKey: String,
     originalMessage: String,
     onClose: () -> Unit,
-    onSendToWhatsApp: (String) -> Unit = {}
+    onSendToWhatsApp: (String) -> Unit = {},
+    onVoiceListeningChanged: (Boolean) -> Unit = {}
 ) {
     val context = LocalContext.current
     val app = context.applicationContext as EMHApplication
@@ -78,8 +79,49 @@ fun EmotionalPanel(
     }
     val currentModel by app.settingsRepository.defaultModel.collectAsState(initial = "llama3.2")
     var useHierarchicalAgent by remember { mutableStateOf(true) }
+    var voiceEnabled by remember { mutableStateOf(true) }
+    var autoSpeakReplies by remember { mutableStateOf(false) }
+    var voiceInputEnabled by remember { mutableStateOf(true) }
+    var activeMessage by remember { mutableStateOf(originalMessage) }
+    var voiceStatus by remember { mutableStateOf("") }
+    var isListening by remember { mutableStateOf(false) }
+    var isSpeaking by remember { mutableStateOf(false) }
+
+    LaunchedEffect(originalMessage) { activeMessage = originalMessage }
+
     LaunchedEffect(Unit) {
         app.settingsRepository.useHierarchicalAgent.collect { useHierarchicalAgent = it }
+    }
+    LaunchedEffect(Unit) {
+        app.settingsRepository.voiceEnabled.collect { voiceEnabled = it }
+    }
+    LaunchedEffect(Unit) {
+        app.settingsRepository.autoSpeakReplies.collect { autoSpeakReplies = it }
+    }
+    LaunchedEffect(Unit) {
+        app.settingsRepository.voiceInputEnabled.collect { voiceInputEnabled = it }
+    }
+
+    val voiceHelper = remember {
+        VoiceHelper(context).apply {
+            onListeningChanged = { listening ->
+                isListening = listening
+                onVoiceListeningChanged(listening)
+            }
+            onSpeakingChanged = { speaking -> isSpeaking = speaking }
+            onPartialSpeech = { partial -> voiceStatus = "Hearing: $partial" }
+            onFinalSpeech = { text ->
+                activeMessage = if (activeMessage.isBlank()) text else "$activeMessage $text"
+                voiceStatus = "Voice added to message"
+            }
+            onSpeechError = { err -> voiceStatus = err }
+        }
+    }
+
+    LaunchedEffect(Unit) { voiceHelper.initTts() }
+
+    DisposableEffect(Unit) {
+        onDispose { voiceHelper.shutdown() }
     }
 
     // Register for history restore requests
@@ -107,20 +149,6 @@ fun EmotionalPanel(
         }
     }
 
-    var tts by remember { mutableStateOf<TextToSpeech?>(null) }
-
-    LaunchedEffect(Unit) {
-        tts = TextToSpeech(context) { status ->
-            if (status == TextToSpeech.SUCCESS) {
-                tts?.language = Locale.US
-            }
-        }
-    }
-
-    DisposableEffect(Unit) {
-        onDispose { tts?.shutdown() }
-    }
-
     Column(
         modifier = Modifier
             .width(340.dp)
@@ -136,10 +164,41 @@ fun EmotionalPanel(
         Spacer(Modifier.height(4.dp))
 
         Text(
-            text = originalMessage,
+            text = activeMessage,
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
+
+        if (voiceEnabled && voiceInputEnabled) {
+            Spacer(Modifier.height(8.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedButton(
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        if (isListening) {
+                            voiceHelper.stopListening()
+                        } else {
+                            voiceStatus = "Listening..."
+                            voiceHelper.startListening()
+                        }
+                    }
+                ) {
+                    Text(if (isListening) "Stop mic" else "🎤 Voice input")
+                }
+                if (activeMessage != originalMessage) {
+                    TextButton(onClick = { activeMessage = originalMessage }) {
+                        Text("Reset message")
+                    }
+                }
+            }
+            if (voiceStatus.isNotBlank()) {
+                Text(
+                    voiceStatus,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+        }
 
         Spacer(Modifier.height(16.dp))
 
@@ -261,7 +320,7 @@ fun EmotionalPanel(
 
                             val agentResult = agentOrchestrator.generateReply(
                                 contactKey = contactKey,
-                                incomingMessage = originalMessage,
+                                incomingMessage = activeMessage,
                                 desiredFigurativeLevel = figurativeLevel,
                                 preferredTone = selectedTone,
                                 hasVision = willUseVision,
@@ -276,7 +335,7 @@ fun EmotionalPanel(
                         } else {
                             finalPrompt = promptEngine.buildPrompt(
                                 contactKey = contactKey,
-                                originalMessage = originalMessage,
+                                originalMessage = activeMessage,
                                 visionDescription = visionDesc.takeIf { it.isNotBlank() },
                                 figurativeLevel = figurativeLevel,
                                 tonePreset = selectedTone
@@ -305,6 +364,9 @@ fun EmotionalPanel(
                             suggestedReply = parsed.suggestedReply
                             emotionalInsight = parsed.emotionalInsight
                             statusMessage = ""
+                            if (voiceEnabled && autoSpeakReplies && parsed.suggestedReply.isNotBlank()) {
+                                voiceHelper.speak(parsed.suggestedReply)
+                            }
                             // Clear vision buffers (single + multi) after consumption
                             com.emh.app.vision.ScreenCaptureService.clearVisionBuffers()
                             visionAttached = false
@@ -498,11 +560,16 @@ fun EmotionalPanel(
                     Text("Copy")
                 }
 
-                OutlinedButton(onClick = {
-                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                    tts?.speak(suggestedReply, TextToSpeech.QUEUE_FLUSH, null, "EMH")
-                }) {
-                    Text("Speak")
+                if (voiceEnabled) {
+                    OutlinedButton(
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            if (isSpeaking) voiceHelper.stopSpeaking() else voiceHelper.speak(suggestedReply)
+                        },
+                        enabled = suggestedReply.isNotBlank()
+                    ) {
+                        Text(if (isSpeaking) "Stop" else "Speak")
+                    }
                 }
 
                 // FINISHING: Explicit manual "Paste Reply" button to satisfy auto-paste reliability issues (#2, #6).
