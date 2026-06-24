@@ -46,10 +46,24 @@
         android:layout_marginBottom="12dp" />
 
     <Button
+        android:id="@+id/btnRequestMic"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="3. Grant Microphone (Voice)"
+        android:layout_marginBottom="12dp" />
+
+    <Button
+        android:id="@+id/btnOpenSettings"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Open Settings"
+        android:layout_marginBottom="12dp" />
+
+    <Button
         android:id="@+id/btnStartService"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="3. Test Floating Panel (Demo)"
+        android:text="4. Test Floating Panel (Demo)"
         android:layout_marginTop="24dp" />
 
     <TextView

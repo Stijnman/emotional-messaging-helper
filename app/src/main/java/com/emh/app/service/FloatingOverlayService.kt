@@ -18,6 +18,7 @@ class FloatingOverlayService : Service() {
 
     private lateinit var windowManager: WindowManager
     private var floatingView: ComposeView? = null
+    private var windowLayoutParams: WindowManager.LayoutParams? = null
 
     override fun onCreate() {
         super.onCreate()
@@ -44,6 +45,16 @@ class FloatingOverlayService : Service() {
                     contactKey = contactKey,
                     originalMessage = originalMessage,
                     onClose = { stopSelf() },
+                    onVoiceListeningChanged = { listening ->
+                        windowLayoutParams?.let { wmParams ->
+                            if (listening) {
+                                wmParams.flags = wmParams.flags and WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE.inv()
+                            } else {
+                                wmParams.flags = wmParams.flags or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                            }
+                            floatingView?.let { windowManager.updateViewLayout(it, wmParams) }
+                        }
+                    },
                     onSendToWhatsApp = { text ->
                         val service = com.emh.app.service.WhatsAppAccessibilityService.instance
                         val pasted = service?.pasteTextIntoWhatsApp(text) == true
@@ -73,6 +84,7 @@ class FloatingOverlayService : Service() {
         }
 
         floatingView = composeView
+        windowLayoutParams = params
         windowManager.addView(composeView, params)
     }
 

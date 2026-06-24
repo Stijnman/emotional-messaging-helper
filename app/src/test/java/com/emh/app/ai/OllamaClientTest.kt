@@ -23,8 +23,8 @@ class OllamaClientTest {
 
     @Test
     fun `suggestVisionModelIfNeeded returns vision model when needed`() {
-        assertEquals("llava", OllamaClient.suggestVisionModelIfNeeded("llama3.2"))
-        assertEquals("llava", OllamaClient.suggestVisionModelIfNeeded("mistral"))
+        assertEquals("gemma3:4b", OllamaClient.suggestVisionModelIfNeeded("llama3.2"))
+        assertEquals("gemma3:4b", OllamaClient.suggestVisionModelIfNeeded("mistral"))
         assertEquals("llava-llama3", OllamaClient.suggestVisionModelIfNeeded("llava-llama3"))
     }
 
