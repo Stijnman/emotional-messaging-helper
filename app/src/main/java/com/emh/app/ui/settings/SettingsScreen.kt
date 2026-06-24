@@ -360,7 +360,7 @@ fun SettingsScreen() {
         OutlinedTextField(
             value = importJson,
             onValueChange = { importJson = it },
-            label = { Text("Paste exported JSON here to import") },
+            label = { Text("Paste exported JSON (single contact or full array)") },
             modifier = Modifier.fillMaxWidth(),
             minLines = 2,
             maxLines = 4

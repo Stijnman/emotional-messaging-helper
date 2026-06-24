@@ -14,8 +14,8 @@ android {
         minSdk = 26
         //noinspection OldTargetApi
         targetSdk = 35
-        versionCode = 4
-        versionName = "0.3.0" // Systematic ROADMAP closeout: 5 skills + toggles + memory UI + vision multi-frame + bottom sheet + global agent toggle + F-Droid skeletons + docs + tests
+        versionCode = 5
+        versionName = "0.3.1" // Complete: voice + memory import fix + device test scripts + release docs
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

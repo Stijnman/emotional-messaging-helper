@@ -1,0 +1,5 @@
+v0.3.1 — project complete
+- Voice: TTS read-aloud, speech input, auto-speak, settings toggles
+- Memory import now supports full JSON array export round-trip
+- Device test scripts (ADB + Waydroid)
+- Release docs and F-Droid metadata finalized

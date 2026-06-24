@@ -61,4 +61,20 @@ class RelationshipMemoryManagerTest {
         manager.clearNote("test-contact")
         assertEquals("", manager.getNote("test-contact"))
     }
+
+    @Test
+    fun `importEncryptedMemory accepts JSON array from exportAllMemory`() {
+        manager.saveNote("contact-a", "Note A")
+        manager.savePreference("contact-a", "preferred_tone", "warm")
+        manager.saveNote("contact-b", "Note B")
+
+        val exported = manager.exportAllMemory()
+        manager.saveNote("contact-a", "")
+        manager.saveNote("contact-b", "")
+
+        assertEquals(true, manager.importEncryptedMemory(exported))
+        assertEquals("Note A", manager.getNote("contact-a"))
+        assertEquals("warm", manager.getPreference("contact-a", "preferred_tone", ""))
+        assertEquals("Note B", manager.getNote("contact-b"))
+    }
 }

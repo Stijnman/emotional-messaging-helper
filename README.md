@@ -19,6 +19,7 @@ Android floating overlay app for WhatsApp that provides psychologically intellig
 | Extensible Skill System      | 5 lightweight skills (tone, deception, empathy, memory updates, conflict de-escalation) — all toggleable (Phase 2/3) |
 | History + Restore            | Save generations, search, one-tap restore into panel |
 | Smart Auto-Paste             | Direct accessibility paste + reliable clipboard fallback + haptics/toasts |
+| Voice (TTS + Speech Input)   | Read replies aloud, speak context into the panel, auto-speak |
 | Floating Overlay Panel       | Rich Compose UI with haptics, templates, vision UI |
 
 ## Screenshots
@@ -52,7 +53,7 @@ graph TD
 
 See `docs/architecture.md` for full details (includes Mermaid of the agent + skills loop + multi-frame vision).
 
-**Latest autonomous progress (YOLO Gemma)**: 5 skills + global agent toggle, multi-frame vision, memory export UI in Settings, bottom-sheet reasoning, full ROADMAP/TESTING/docs with images, **Gemma 3/4 support** (via Ollama — recommended `gemma3:4b` / edge `gemma4:e2b` for on-device-friendly use). True on-device path documented (Google AI Edge Gallery + future MediaPipe). All on `feature/phase2-agent-skills`.
+**v0.3.1 (complete):** Hierarchical agent + 5 skills, multi-frame vision, memory export/import, bottom-sheet reasoning, voice (TTS + speech input), Gemma 3/4 support via Ollama, device test scripts, F-Droid/fastlane metadata. See [ROADMAP.md](ROADMAP.md) (COMPLETE) and [RELEASE.md](RELEASE.md).
 
 ## Quick Start (One-Click Ollama)
 
@@ -93,17 +94,15 @@ EMH's moat is **psychological depth + local privacy + extensibility via skills**
 - Full agent reasoning visible (expandable + copy + dialog) and skill notes enrich the prompt.
 - Memory suggestions from skills are one-tap applyable.
 
-**Phase 3 (In Progress):** Vision hardening (multi-frame, images in agent context), full F-Droid + release prep, memory export UI, bottom-sheet reasoning, testing & device validation.
+**Phase 3 (Done):** Vision hardening, F-Droid/release prep, memory export UI, bottom-sheet reasoning, voice, testing scripts.
 
-**Full remaining work, priorities, and original checklist status:** See [ROADMAP.md](ROADMAP.md).
-
-This document is being closed out systematically ("do all areas one by one until it's all done").
+**Status:** Project complete at v0.3.1. See [ROADMAP.md](ROADMAP.md) and [TESTING.md](TESTING.md).
 
 ## License
 
 Apache-2.0 (see LICENSE). Recommended for open community distribution and F-Droid compatibility. Personal, educational, and commercial use permitted with attribution.
 
-See [ROADMAP.md](ROADMAP.md) for full remaining work, phase status vs original plan, and checklist.  
+See [RELEASE.md](RELEASE.md) for build/tag instructions.  
 See [docs/architecture.md](docs/architecture.md) for detailed architecture + Mermaid.
 
 ## Contributing
@@ -114,9 +113,13 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) and [SETUP.md](SETUP.md).
 
 **Built autonomously with heavy iteration loops for reliability on real devices.**
 
+## Device Testing
+
+```bash
+./scripts/test-android.sh    # ADB: phone or emulator
+./scripts/test-waydroid.sh   # Linux Waydroid container
+```
+
 ## Building for Release / F-Droid
-- Bump version in `app/build.gradle.kts`.
-- For graphics: capture real screenshots on device (see `fastlane/metadata/android/en-US/graphics/README.txt` and `TESTING.md`).
-- Build signed release APK in Android Studio (Build > Generate Signed Bundle/APK).
-- F-Droid metadata skeleton lives in `fdroid/metadata/com.emh.app/`.
-- See [ROADMAP.md](ROADMAP.md) and [TESTING.md](TESTING.md) for the full closeout status and device validation steps.
+
+See [RELEASE.md](RELEASE.md) for version bump, signed APK, tagging, and F-Droid submission steps.

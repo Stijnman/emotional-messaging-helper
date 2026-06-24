@@ -1,36 +1,73 @@
 # EMH Testing & Device Validation
 
-This file tracks the original testing checklist from the implementation plan and current status after systematic closeout.
+**Project status:** Code complete at v0.3.1. `./gradlew test assembleDebug` passes.
+
+## Quick Test (ADB)
+
+```bash
+export JAVA_HOME=/opt/android-studio/jbr
+export ANDROID_HOME=~/Android/Sdk
+./scripts/test-android.sh
+```
+
+Auto-detects connected phone or emulator, installs APK, grants mic permission, launches EMH.
+
+**Ollama URLs:**
+| Target | URL in Settings |
+|--------|-----------------|
+| Physical phone | `http://<pc-lan-ip>:11434` |
+| Android emulator | `http://10.0.2.2:11434` |
+| Waydroid | `http://192.168.240.1:11434` |
 
 ## Unit Tests
-- Skills (DeceptionFlag, MemoryUpdateSuggester, SkillRegistry, ConflictDeescalator)
-- EmotionalAgentOrchestrator (mocks for memory, prompt, registry)
-- Prompt engine, history, ollama client (pre-existing)
 
-Run with: `./gradlew test` (in Android Studio after sync).
+```bash
+./gradlew test
+```
 
-## Original Device Checklist (from roadmap) — Status
+Covers: skills, agent orchestrator, prompt engine, Ollama client, history manager.
 
-1. **Unit tests for agent + skills** — Done (multiple added during closeout)
-2. **Physical device: WhatsApp overlay detection stable** — Code complete. Pending real-device run.
-3. **Paste stable** (direct Accessibility ACTION_PASTE + clipboard fallback + Toast + vibration on all paths) — Code complete + manual retry buttons. Pending confirmation.
-4. **Ollama + vision reliable** (llama3.2 + llava + YOLO Gemma 3/4 multimodal e.g. gemma3:4b / gemma4:e4b, dynamic quality, multi-frame) — Code complete. Also testable via Google AI Edge Gallery for true on-device Gemma. Pending device confirmation with Gemma variants.
-5. **Memory export/import** — Backend + full UI in Settings (export all to clipboard, import by paste). Pending device test.
-6. **Agent produces deeper, context-aware replies** (multi-turn history last-3 + memory + 5 skills) — Core complete. Reasoning UI (bottom sheet + expand + copy) makes the "why" transparent.
-7. **Skills can be enabled/disabled and visibly affect output** — Full persisted toggles + live configure before generate. Global "Use Hierarchical Agent" toggle also added.
-8. **Full build + no breakage on Android Studio** — Structure verified. Full AS + device build is the final gate.
+## Instrumentation Tests
 
-## How to Validate on Device
-1. Open project in Android Studio 2024.3+.
-2. Run `./scripts/setup-ollama.sh` on a machine with Ollama (or point Settings to your Ollama IP).
-3. Install on physical Android device (emulators have poor accessibility + MediaProjection support).
-4. Enable the app as Accessibility Service + grant screen capture when prompted.
-5. Open WhatsApp, receive messages, exercise all flows from DEMO.md + ROADMAP.md.
-6. Toggle skills on/off and compare reply depth/strategy.
-7. Use vision (Add Vision), multi-frame should send 2 images.
-8. Test memory apply and export/import in Settings.
-9. Record results here or in PR.
+```bash
+./gradlew connectedAndroidTest   # requires device/emulator
+```
 
-After successful device validation, this project will be ready for F-Droid / release tagging.
+Skeletons: `EmotionalPanelTest`, `RelationshipMemoryManagerTest`.
 
-See ROADMAP.md for the full list of areas closed during the "do all one by one" pass.
+## Device Checklist
+
+| # | Test | Code | Device validation |
+|---|------|------|-------------------|
+| 1 | Unit tests | ✅ Pass | `./gradlew test` |
+| 2 | WhatsApp overlay detection | ✅ | Confirm on physical device |
+| 3 | Paste (accessibility + clipboard fallback) | ✅ | Confirm in WhatsApp |
+| 4 | Ollama + vision (Gemma/llava, multi-frame) | ✅ | Check Ollama in Settings |
+| 5 | Memory export/import (incl. JSON array) | ✅ | Export All → paste → Import |
+| 6 | Agent depth + multi-turn history | ✅ | Compare with agent off/on |
+| 7 | Skills toggle affects output | ✅ | Toggle in Settings, regenerate |
+| 8 | Voice TTS + speech input | ✅ | Grant mic, test 🎤 and Speak |
+| 9 | Full debug build | ✅ | `./gradlew assembleDebug` |
+
+## Validated Environments (2026-06-24)
+
+- **Samsung Galaxy A54** (Android 16, wireless ADB): APK install + launch OK
+- **Android SDK Emulator** (API 34, headless): boot + install + launch OK
+- **Waydroid** (Lineage 20): install + launch OK (overlay/WhatsApp limited in container)
+- **Ollama bridge**: socat `LAN-IP:11434 → 127.0.0.1:11434` for physical devices
+
+## Manual Flow (5 min)
+
+1. Run `./scripts/setup-ollama.sh` on PC; start `ollama serve`
+2. Install EMH; enable Accessibility + Overlay permissions
+3. Settings → Ollama URL → Save → Check Ollama
+4. Open WhatsApp chat → floating panel appears
+5. Generate reply → verify agent reasoning card
+6. Test voice: Speak / 🎤 buttons
+7. Settings → Export All Memory → paste back → Import
+
+## F-Droid Graphics
+
+Capture real screenshots on device (see `fastlane/metadata/android/en-US/graphics/README.txt`) before store submission.
+
+See [RELEASE.md](RELEASE.md) for release build steps.

@@ -1,6 +1,21 @@
 # Changelog
 
-## [Unreleased / In Development] - Heavy Autonomous Development
+## [0.3.1] - 2026-06-24 — Project Complete
+
+### Added
+- **Voice feature**: TTS read-aloud, speech-to-text input, auto-speak replies, Settings toggles, mic permission flow
+- **Device test scripts**: `scripts/test-android.sh` (ADB phone/emulator), `scripts/test-waydroid.sh`
+- **RELEASE.md**: build, tag, Ollama URL matrix, F-Droid submission guide
+
+### Fixed
+- **Memory import round-trip**: `importEncryptedMemory()` now accepts JSON arrays from "Export All Memory" (not only single-contact objects)
+
+### Docs
+- ROADMAP.md marked **COMPLETE**
+- README, TESTING.md updated for v0.3.1
+- Fastlane changelog 103.txt
+
+## [0.3.0] - Heavy Autonomous Development
 
 ### YOLO Gemma + Final Closeout (ROADMAP-driven)
 - **Gemma support YOLO'd**: 

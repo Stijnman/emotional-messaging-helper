@@ -100,25 +100,34 @@ class RelationshipMemoryManager(context: Context) {
      * Overwrites existing data for that contactKey.
      */
     fun importEncryptedMemory(jsonData: String): Boolean {
+        val trimmed = jsonData.trim()
+        if (trimmed.isBlank()) return false
         return try {
-            val json = org.json.JSONObject(jsonData)
-            val contactKey = json.optString("contactKey", "").takeIf { it.isNotBlank() } ?: return false
-
-            val note = json.optString("note", "")
-            val tone = json.optString("preferred_tone", "")
-            // relationship_strength is derived, so we just restore the note + tone
-
-            if (note.isNotBlank()) {
-                saveNote(contactKey, note)
+            when {
+                trimmed.startsWith("[") -> {
+                    val array = org.json.JSONArray(trimmed)
+                    if (array.length() == 0) return false
+                    var imported = 0
+                    for (i in 0 until array.length()) {
+                        if (importSingleContact(array.getJSONObject(i))) imported++
+                    }
+                    imported > 0
+                }
+                else -> importSingleContact(org.json.JSONObject(trimmed))
             }
-            if (tone.isNotBlank()) {
-                savePreference(contactKey, "preferred_tone", tone)
-            }
-            true
         } catch (e: Exception) {
             android.util.Log.e("RelationshipMemoryManager", "Failed to import memory: ${e.message}")
             false
         }
+    }
+
+    private fun importSingleContact(json: org.json.JSONObject): Boolean {
+        val contactKey = json.optString("contactKey", "").takeIf { it.isNotBlank() } ?: return false
+        val note = json.optString("note", "")
+        val tone = json.optString("preferred_tone", "")
+        if (note.isNotBlank()) saveNote(contactKey, note)
+        if (tone.isNotBlank()) savePreference(contactKey, "preferred_tone", tone)
+        return note.isNotBlank() || tone.isNotBlank()
     }
 
     /**
