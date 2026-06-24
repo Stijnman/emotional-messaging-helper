@@ -41,11 +41,23 @@ fun EmotionalPanel(
     var statusMessage by remember { mutableStateOf("") }
     var lastUsedVision by remember { mutableStateOf(false) }
 
+    // Phase 2: Agent visibility
+    var agentReasoning by remember { mutableStateOf("") }
+    var agentSkillsUsed by remember { mutableStateOf(emptyList<String>()) }
+
+    // Memory suggestions surfaced from MemoryUpdateSuggester skill (list supports multiple; user can apply)
+    var memorySuggestions by remember { mutableStateOf(emptyList<String>()) }
+
+    // Full reasoning (bottom sheet per original roadmap) + inline expand + copy
+    var showFullReasoning by remember { mutableStateOf(false) }
+    var reasoningExpanded by remember { mutableStateOf(false) }
+    val reasoningSheetState = androidx.compose.material3.rememberModalBottomSheetState()
+
     // Auto-clear vision when contact changes (smart behavior)
     var lastContact by remember { mutableStateOf(contactKey) }
     LaunchedEffect(contactKey) {
         if (contactKey != lastContact) {
-            com.emh.app.vision.ScreenCaptureService.lastScreenshotBase64 = null
+            com.emh.app.vision.ScreenCaptureService.clearVisionBuffers()
             visionAttached = false
             lastContact = contactKey
         }
@@ -54,6 +66,8 @@ fun EmotionalPanel(
     val scope = rememberCoroutineScope()
     val ollama = remember { OllamaClient() }
     val promptEngine = remember { EmotionalPromptEngine(app.memoryManager) }
+    val skillRegistry = remember { com.emh.app.skills.SkillRegistry() }
+    val agentOrchestrator = remember { com.emh.app.agent.EmotionalAgentOrchestrator(app.memoryManager, promptEngine, skillRegistry) }
     val haptic = LocalHapticFeedback.current
 
     // Load settings on composition
@@ -63,6 +77,10 @@ fun EmotionalPanel(
         }
     }
     val currentModel by app.settingsRepository.defaultModel.collectAsState(initial = "llama3.2")
+    var useHierarchicalAgent by remember { mutableStateOf(true) }
+    LaunchedEffect(Unit) {
+        app.settingsRepository.useHierarchicalAgent.collect { useHierarchicalAgent = it }
+    }
 
     // Register for history restore requests
     LaunchedEffect(Unit) {
@@ -72,11 +90,12 @@ fun EmotionalPanel(
         }
     }
 
-    // Watch for vision screenshot being captured
+    // Watch for vision screenshot being captured (supports multi-frame buffer too)
     LaunchedEffect(Unit) {
         while (true) {
             kotlinx.coroutines.delay(800)
-            visionAttached = com.emh.app.vision.ScreenCaptureService.lastScreenshotBase64 != null
+            visionAttached = com.emh.app.vision.ScreenCaptureService.lastScreenshotBase64 != null ||
+                com.emh.app.vision.ScreenCaptureService.getRecentVisionBase64(1).isNotEmpty()
         }
     }
 
@@ -145,6 +164,13 @@ fun EmotionalPanel(
             }
         }
 
+        // Phase 2: Agent mode indicator (always on for now, as per roadmap core)
+        Row {
+            Text("🧠 Advanced Agent Mode", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
+            Spacer(Modifier.width(4.dp))
+            Text("(hierarchical + skills)", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+
         Spacer(Modifier.height(12.dp))
 
         if (visionAttached) {
@@ -162,7 +188,7 @@ fun EmotionalPanel(
                             modifier = Modifier.weight(1f)
                         )
                         TextButton(onClick = {
-                            com.emh.app.vision.ScreenCaptureService.lastScreenshotBase64 = null
+                            com.emh.app.vision.ScreenCaptureService.clearVisionBuffers()
                             visionAttached = false
                             haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                         }) {
@@ -205,28 +231,73 @@ fun EmotionalPanel(
                         else -> "Crafting emotionally intelligent reply..."
                     }
                     scope.launch {
-                        val imageBase64 = com.emh.app.vision.ScreenCaptureService.lastScreenshotBase64
+                        val useAgent = useHierarchicalAgent
 
-                        val prompt = promptEngine.buildPrompt(
-                            contactKey = contactKey,
-                            originalMessage = originalMessage,
-                            visionDescription = if (imageBase64 != null) "A screenshot of the conversation was captured for additional visual context." else null,
-                            figurativeLevel = figurativeLevel,
-                            tonePreset = selectedTone
-                        )
+                        // Multi-frame vision support (Phase 3)
+                        val recentImages = com.emh.app.vision.ScreenCaptureService.getRecentVisionBase64(2)
+                        val singleImage = com.emh.app.vision.ScreenCaptureService.lastScreenshotBase64
+                        val imagesForVision = if (recentImages.isNotEmpty()) recentImages else (singleImage?.let { listOf(it) } ?: emptyList())
+                        val willUseVision = imagesForVision.isNotEmpty()
 
-                        lastUsedVision = imageBase64 != null
+                        val recentHistory = try {
+                            app.historyManager.getAllEntriesSync()
+                                .filter { it.contactKey == contactKey }
+                                .takeLast(3)
+                                .map { it.originalMessage }
+                        } catch (e: Exception) {
+                            emptyList<String>()
+                        }
 
-                        val effectiveModel = if (imageBase64 != null && !OllamaClient.isLikelyVisionModel(currentModel)) {
+                        val visionDesc = if (willUseVision) {
+                            if (imagesForVision.size > 1) "Recent screenshots of the conversation provide visual context (multi-frame)." else "A screenshot of the conversation was captured for additional visual context."
+                        } else ""
+
+                        val finalPrompt: String
+                        if (useAgent) {
+                            try {
+                                val enables = app.settingsRepository.getSkillEnables()
+                                skillRegistry.configureEnabled(enables)
+                            } catch (_: Exception) {}
+
+                            val agentResult = agentOrchestrator.generateReply(
+                                contactKey = contactKey,
+                                incomingMessage = originalMessage,
+                                desiredFigurativeLevel = figurativeLevel,
+                                preferredTone = selectedTone,
+                                hasVision = willUseVision,
+                                visionDescription = visionDesc,
+                                recentHistory = recentHistory,
+                                visionImages = imagesForVision
+                            )
+                            finalPrompt = agentResult.suggestedReply
+                            agentReasoning = agentResult.reasoning
+                            agentSkillsUsed = agentResult.invokedSkills
+                            memorySuggestions = agentResult.memorySuggestions
+                        } else {
+                            finalPrompt = promptEngine.buildPrompt(
+                                contactKey = contactKey,
+                                originalMessage = originalMessage,
+                                visionDescription = visionDesc.takeIf { it.isNotBlank() },
+                                figurativeLevel = figurativeLevel,
+                                tonePreset = selectedTone
+                            )
+                            agentReasoning = ""
+                            agentSkillsUsed = emptyList()
+                            memorySuggestions = emptyList()
+                        }
+
+                        lastUsedVision = willUseVision
+
+                        val effectiveModel = if (willUseVision && !OllamaClient.isLikelyVisionModel(currentModel)) {
                             OllamaClient.suggestVisionModelIfNeeded(currentModel)
                         } else {
                             currentModel
                         }
 
-                        val result = if (imageBase64 != null) {
-                            ollama.generateWithImages(effectiveModel, prompt, listOf(imageBase64))
+                        val result = if (willUseVision && imagesForVision.isNotEmpty()) {
+                            ollama.generateWithImages(effectiveModel, finalPrompt, imagesForVision)
                         } else {
-                            ollama.generate(currentModel, prompt)
+                            ollama.generate(currentModel, finalPrompt)
                         }
 
                         result.onSuccess { raw ->
@@ -234,9 +305,11 @@ fun EmotionalPanel(
                             suggestedReply = parsed.suggestedReply
                             emotionalInsight = parsed.emotionalInsight
                             statusMessage = ""
-                            // Clear the used screenshot
-                            com.emh.app.vision.ScreenCaptureService.lastScreenshotBase64 = null
+                            // Clear vision buffers (single + multi) after consumption
+                            com.emh.app.vision.ScreenCaptureService.clearVisionBuffers()
                             visionAttached = false
+                            memorySuggestions = emptyList()
+                            reasoningExpanded = false
                         }.onFailure { error ->
                             emotionalInsight = when {
                                 error.message?.contains("timeout", ignoreCase = true) == true ->
@@ -284,6 +357,123 @@ fun EmotionalPanel(
                 }
             }
             Text(emotionalInsight, style = MaterialTheme.typography.bodyMedium)
+        }
+
+        // Phase 2+: Display agent reasoning and skills. Clickable + expandable for full "Why this reply?" view.
+        if (agentReasoning.isNotBlank() || agentSkillsUsed.isNotEmpty()) {
+            Spacer(Modifier.height(12.dp))
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
+                )
+            ) {
+                Column(Modifier.padding(12.dp)) {
+                    Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+                        Text("🧠 Agent Analysis", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
+                        Spacer(Modifier.weight(1f))
+                        TextButton(onClick = { showFullReasoning = true }) {
+                            Text("Full dialog", style = MaterialTheme.typography.labelSmall)
+                        }
+                    }
+                    if (agentReasoning.isNotBlank()) {
+                        val displayText = if (reasoningExpanded) agentReasoning else (agentReasoning.take(260) + if (agentReasoning.length > 260) "..." else "")
+                        Text(
+                            displayText,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        if (agentReasoning.length > 260) {
+                            TextButton(onClick = {
+                                reasoningExpanded = !reasoningExpanded
+                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            }) {
+                                Text(if (reasoningExpanded) "Collapse" else "Expand analysis")
+                            }
+                        }
+                    }
+                    if (agentSkillsUsed.isNotEmpty()) {
+                        Spacer(Modifier.height(6.dp))
+                        Text(
+                            "Skills invoked: ${agentSkillsUsed.joinToString(", ")}",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.tertiary
+                        )
+                    }
+                    // Quick actions
+                    Row {
+                        OutlinedButton(onClick = {
+                            val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                            clipboard.setPrimaryClip(android.content.ClipData.newPlainText("EMH Agent Reasoning", agentReasoning))
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        }) {
+                            Text("Copy analysis")
+                        }
+                    }
+                }
+            }
+        }
+
+        // Memory suggestions apply UI (from MemoryUpdateSuggester) - supports multiple, one-tap append all
+        if (memorySuggestions.isNotEmpty()) {
+            Spacer(Modifier.height(8.dp))
+            Card(
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
+            ) {
+                Column(Modifier.padding(12.dp)) {
+                    Text("💾 Suggested memory updates (${memorySuggestions.size})", style = MaterialTheme.typography.labelMedium)
+                    memorySuggestions.forEach { sug ->
+                        Text("• $sug", style = MaterialTheme.typography.bodySmall)
+                    }
+                    Spacer(Modifier.height(6.dp))
+                    Button(onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        val joined = memorySuggestions.joinToString(" | ")
+                        app.memoryManager.appendNote(contactKey, joined)
+                        statusMessage = "Memory notes saved for $contactKey"
+                        memorySuggestions = emptyList()
+                    }) {
+                        Text("Apply these notes to memory")
+                    }
+                }
+            }
+        }
+
+        // Full agent reasoning as ModalBottomSheet (preferred "Why this reply?" experience from original roadmap)
+        // Triggered from the 🧠 card. Inline expand + copy also available on the card itself.
+        if (showFullReasoning) {
+            androidx.compose.material3.ModalBottomSheet(
+                onDismissRequest = { showFullReasoning = false },
+                sheetState = reasoningSheetState
+            ) {
+                Column(
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .verticalScroll(rememberScrollState())
+                ) {
+                    Text("🧠 Why this reply? (Full Agent Analysis)", style = MaterialTheme.typography.titleMedium)
+                    Spacer(Modifier.height(12.dp))
+
+                    if (agentReasoning.isNotBlank()) {
+                        Text(agentReasoning, style = MaterialTheme.typography.bodyMedium)
+                    }
+                    if (agentSkillsUsed.isNotEmpty()) {
+                        Spacer(Modifier.height(16.dp))
+                        Text("Skills invoked: ${agentSkillsUsed.joinToString(", ")}", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.tertiary)
+                    }
+                    Spacer(Modifier.height(16.dp))
+                    Text(
+                        "This enriched analysis (analysis + all enabled skill insights) was injected into the prompt before the final generation step. The hierarchical agent (with multi-turn history and memory) produced a more contextually appropriate reply than a single-shot prompt would have.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    Spacer(Modifier.height(24.dp))
+                    Button(onClick = { showFullReasoning = false }, modifier = Modifier.fillMaxWidth()) {
+                        Text("Close")
+                    }
+                }
+            }
         }
 
         if (suggestedReply.isNotBlank()) {

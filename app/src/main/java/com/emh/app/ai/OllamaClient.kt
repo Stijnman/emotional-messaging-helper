@@ -162,31 +162,59 @@ class OllamaClient(
     }
 
     /**
-     * Recommended vision models for EMH.
-     * These work well for screenshot analysis.
+     * Recommended models for EMH (YOLO Gemma support added).
+     * Gemma 3/4 (especially edge E2B/E4B and 4B multimodal) are excellent modern alternatives
+     * to Llama 3.2 + llava. They are lightweight, have strong reasoning for the agent+skills loop,
+     * and work great via Ollama for both text and vision (screenshots).
+     *
+     * On-device options (no external Ollama server):
+     * - Google AI Edge Gallery app (easiest for testing Gemma 4 on phone)
+     * - MediaPipe LLM Inference API (for native integration in future)
      */
     companion object {
+        val RECOMMENDED_TEXT_MODELS = listOf(
+            "llama3.2",
+            "gemma3:4b",
+            "gemma4:e4b",
+            "gemma4:e2b",
+            "gemma3:1b"
+        )
+
         val RECOMMENDED_VISION_MODELS = listOf(
             "llava",
             "llava-llama3",
+            "gemma3:4b",      // Gemma 3 4B+ are multimodal (text + image)
             "moondream",
             "bakllava"
         )
 
         /**
          * Simple heuristic to suggest if a model name looks like a vision model.
-         * Used for better UX and warnings.
+         * Updated to recognize Gemma 3/4 multimodal variants.
          */
         fun isLikelyVisionModel(model: String): Boolean {
             val lower = model.lowercase()
-            return lower.contains("llava") || lower.contains("vision") || lower.contains("moondream")
+            return lower.contains("llava") || lower.contains("vision") || lower.contains("moondream") ||
+                   lower.contains("gemma3:4b") || lower.contains("gemma3:12b") || lower.contains("gemma3:27b") ||
+                   lower.contains("gemma4") && (lower.contains("4b") || lower.contains("e4b") || lower.contains("multimodal"))
         }
 
         /**
-         * AUTONOMOUS IMPROVEMENT: Returns a recommended vision model if the current one doesn't look like one.
+         * AUTONOMOUS IMPROVEMENT (YOLO Gemma): Returns a recommended vision model if the current one doesn't look like one.
+         * Prefers a strong Gemma multimodal if available, otherwise falls back to llava.
          */
         fun suggestVisionModelIfNeeded(currentModel: String): String {
-            return if (isLikelyVisionModel(currentModel)) currentModel else "llava"
+            return if (isLikelyVisionModel(currentModel)) currentModel else "gemma3:4b"
         }
+
+        /**
+         * Quick list of Gemma recommendations for Settings UI and docs.
+         * These are optimized for the emotional agent + skills + vision use case.
+         */
+        val RECOMMENDED_GEMMA_MODELS = listOf(
+            "gemma3:4b" to "Great balance (multimodal, ~3.3GB) - recommended starting point for Gemma",
+            "gemma4:e2b" to "Lightest edge model (~1.5GB) - best for lower-RAM phones or fast responses",
+            "gemma4:e4b" to "Stronger edge model (~5GB) - excellent reasoning for agent skills"
+        )
     }
 }

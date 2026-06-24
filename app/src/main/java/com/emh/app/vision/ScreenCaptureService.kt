@@ -89,44 +89,62 @@ class ScreenCaptureService : Service() {
         )
 
         imageReader?.setOnImageAvailableListener({ reader ->
-            val image = reader.acquireLatestImage() ?: return@setOnImageAvailableListener
-
             scope.launch {
-                val planes = image.planes
-                val buffer = planes[0].buffer
-                val pixelStride = planes[0].pixelStride
-                val rowStride = planes[0].rowStride
-                val rowPadding = rowStride - pixelStride * width
+                val capturedBase64s = mutableListOf<String>()
+                val onMobile = ScreenshotHelper.isLikelyOnMobileData(this@ScreenCaptureService)
+                val quality = ScreenshotHelper.getRecommendedQuality(onMobile)
 
-                val bitmap = Bitmap.createBitmap(
-                    width + rowPadding / pixelStride,
-                    height,
-                    Bitmap.Config.ARGB_8888
-                )
-                bitmap.copyPixelsFromBuffer(buffer)
+                // Phase 3 hardening: Grab multiple frames in a single capture session (small delay between shots)
+                // for richer multi-frame context sent to llava.
+                repeat(2) { frameIdx ->
+                    val image = reader.acquireLatestImage() ?: return@launch
+                    try {
+                        val planes = image.planes
+                        val buffer = planes[0].buffer
+                        val pixelStride = planes[0].pixelStride
+                        val rowStride = planes[0].rowStride
+                        val rowPadding = rowStride - pixelStride * width
 
-                // Crop to actual screen size
-                val cropped = Bitmap.createBitmap(bitmap, 0, 0, width, height)
+                        val bitmap = Bitmap.createBitmap(
+                            width + rowPadding / pixelStride,
+                            height,
+                            Bitmap.Config.ARGB_8888
+                        )
+                        bitmap.copyPixelsFromBuffer(buffer)
 
-                // Convert to base64 JPEG for Ollama vision (using improved helper)
-                val base64Image = ScreenshotHelper.bitmapToBase64(cropped, ScreenshotHelper.getRecommendedQuality())
+                        val cropped = Bitmap.createBitmap(bitmap, 0, 0, width, height)
+                        val base64Image = ScreenshotHelper.bitmapToBase64(cropped, quality)
 
-                // Store for the floating panel to pick up
-                LastScreenshot.base64 = base64Image
+                        capturedBase64s.add(base64Image)
+                        lastScreenshotBase64 = base64Image
 
-                android.util.Log.d("EMH", "Screenshot captured and ready for vision: ${cropped.width}x${cropped.height}")
+                        // Keep the ring buffer updated (newest first)
+                        synchronized(recentScreenshots) {
+                            recentScreenshots.add(0, base64Image)
+                            while (recentScreenshots.size > MAX_RECENT) {
+                                recentScreenshots.removeAt(recentScreenshots.lastIndex)
+                            }
+                        }
+
+                        android.util.Log.d("EMH", "Frame ${frameIdx + 1}/2 captured for vision")
+
+                        if (frameIdx < 1) {
+                            kotlinx.coroutines.delay(110) // brief pause for distinct second frame
+                        }
+                    } finally {
+                        image.close()
+                    }
+                }
+
+                android.util.Log.d("EMH", "Multi-frame capture complete: ${capturedBase64s.size} frame(s)")
 
                 // Notify user
                 android.widget.Toast.makeText(
                     this@ScreenCaptureService,
-                    "Screenshot captured for EMH vision",
+                    "Vision ready (${capturedBase64s.size} frames)",
                     android.widget.Toast.LENGTH_SHORT
                 ).show()
 
-                // AUTONOMOUS LOOP IMPROVEMENT: Added explicit success notification for better user feedback in vision flows.
-                // Image is JPEG compressed in ScreenshotHelper for faster Ollama vision roundtrips.
-
-                image.close()
                 stopSelf()
             }
         }, null)
@@ -142,9 +160,29 @@ class ScreenCaptureService : Service() {
     override fun onBind(intent: Intent?): IBinder? = null
 
     companion object {
-        /** Simple in-memory holder for the last captured screenshot (base64 JPEG). */
-        object LastScreenshot {
-            var base64: String? = null
+        /** Standardized holder for the last captured screenshot base64 (JPEG for Ollama vision).
+         * Used by EmotionalPanel and others.
+         */
+        var lastScreenshotBase64: String? = null
+
+        // Phase 3 multi-frame support: ring buffer of recent captures (newest first).
+        // Allows EmotionalPanel to send 1-2 (or more) images to llava for richer visual context.
+        private val recentScreenshots = mutableListOf<String>()
+        private const val MAX_RECENT = 3
+
+        /** Returns up to [max] most recent screenshot base64 strings (newest first). */
+        @JvmStatic
+        fun getRecentVisionBase64(max: Int = 2): List<String> {
+            synchronized(recentScreenshots) {
+                return recentScreenshots.take(max).toList()
+            }
+        }
+
+        /** Clears both single and multi-frame buffers (used on contact switch / after use). */
+        @JvmStatic
+        fun clearVisionBuffers() {
+            lastScreenshotBase64 = null
+            synchronized(recentScreenshots) { recentScreenshots.clear() }
         }
     }
 }

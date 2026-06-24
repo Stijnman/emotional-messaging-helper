@@ -1,0 +1,11 @@
+PLACEHOLDER: screenshot3.png (key marketing shot)
+
+Content idea: EmotionalPanel expanded after "Generate". 
+- Shows the original incoming message.
+- Suggested Reply card (nice reply text).
+- Emotional Insight.
+- Prominently the 🧠 Agent Analysis card (with truncated reasoning + "Skills invoked: deception_flag, empathy_booster").
+- Vision badge if attached.
+- "Paste Reply" and other action buttons.
+
+This demonstrates the Hierarchical Agent + skills value prop. Make sure the Compose card styling (surfaceVariant) and primary colors look good.

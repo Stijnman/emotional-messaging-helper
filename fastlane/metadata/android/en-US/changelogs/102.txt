@@ -1,0 +1,11 @@
+Continue autonomous round (post multi-frame + skill toggles):
+- Added 5th skill: ConflictDeescalatorSkill (detects escalation language, "you always make me", raised voice cues, "fighting again" etc. Suggests calm "I feel" statements, pauses, validation-first de-escalation tactics).
+- All 5 skills now have persisted DataStore toggles in Settings + live registry configuration.
+- Fastlane graphics/ skeleton + phoneScreenshots/ placeholders created (with capture instructions). fdroid/metadata/com.emh.app/ basic structure added for future F-Droid prep (summary, categories, etc.).
+- Agent UI polish: memory suggestions now render as a list of apply-able items (supports multiple). Reasoning card has inline "Expand" toggle for full analysis + "Copy" action + the existing full dialog.
+- New unit test: EmotionalAgentOrchestratorTest (mocks memory, prompt engine, registry; verifies enrichment, invoked skills, memorySuggestions extraction, multi-turn history pass-through).
+- Cleaned outdated "future" / stub comments around vision multi-frame now that it's wired and active.
+- README, CHANGELOG, architecture, DEMO notes updated to reflect 5 skills, multi-frame in production use, configurable agent, memory apply UX.
+- More Phase 3 / F-Droid readiness (placeholders, metadata).
+
+This round focused on hardening the agent system (more skills + control + visibility + test) + store/F-Droid asset pipeline. Branch feature/phase2-agent-skills continues. Device validation highly recommended next.

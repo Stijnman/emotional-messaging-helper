@@ -1,0 +1,5 @@
+PLACEHOLDER: screenshot1.png
+
+Content idea: Clean WhatsApp conversation (romantic or close friend context). Other person sent a vulnerable or charged message. EMH floating action bubble (the overlay trigger) visible in the corner. App name or subtle EMH branding.
+
+Capture on real device running WhatsApp + EMH accessibility + overlay service active. Portrait. High quality, no personal data.

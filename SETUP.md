@@ -40,19 +40,34 @@ The `gradlew` script prints clear instructions when run from terminal.
 - **Display over other apps** (Overlay / SYSTEM_ALERT_WINDOW)
 - **Accessibility Service** → Enable "Emotional Messaging Helper" (this is what lets it read WhatsApp messages and auto-paste)
 
-## 4. Ollama (required for AI features)
+## 4. Ollama (easiest path for full features - YOLO Gemma)
 Ollama must be running and reachable from the Android device (same WiFi is easiest; use your computer's LAN IP).
 
-Recommended models:
-- Text: `llama3.2`, `llama3.1`, or `gemma2`
-- Vision (screenshots): `llava`, `llava-llama3`, `bakllava`, or `moondream`
+**Gemma recommendations** (Google models, great for the emotional agent + skills):
+- `gemma3:4b` — Best balance, multimodal (vision works for screenshots), ~3.3GB
+- `gemma4:e4b` — Stronger edge model
+- `gemma4:e2b` — Lightest (great for lower-RAM phones)
+
+Vision: Use Gemma 3 4B+ or 12B+ (they handle images natively, similar to llava).
 
 Quick test:
 ```bash
-ollama run llava
+ollama run gemma3:4b
+# lightest on-device-friendly
+ollama run gemma4:e2b
 ```
 
-In the app you can change the URL and model in Settings. The panel has a "Check Ollama" button and will auto-suggest a vision model when you attach a screenshot.
+In the app: Change model in Settings. "Fetch models from Ollama" populates chips. The panel auto-suggests Gemma vision models when you attach screenshots.
+
+## 5. True On-Device Gemma (no PC/Ollama server needed)
+For maximum privacy and offline use:
+- Install **Google AI Edge Gallery** (free official Android app).
+- Download and run Gemma 4 E2B/E4B models directly on your phone (fully offline).
+- Test model quality there — these are optimized for mobile.
+
+Longer term: We plan native integration using Google's MediaPipe LLM Inference API + LiteRT so the app can run Gemma completely on-device without any external server (big future win for "no setup" users).
+
+Current architecture keeps Ollama as the primary (flexible + mature vision), but is designed to support hybrid on-device clients. See ROADMAP.md.
 
 ## 5. Run & Test the App
 - Install/run on a **physical Android device** (emulators have very limited accessibility + overlay support).
@@ -76,29 +91,7 @@ In the app you can change the URL and model in Settings. The panel has a "Check 
 
 Autonomous development continues. The goal is "test until all working completely". Your Android Studio + device run is the next critical data point.
 
-## 3. Required Permissions (on device)
-- **Display over other apps** (Overlay)
-- **Accessibility Service** → Enable "Emotional Messaging Helper"
+## 7. Device Testing Feedback
+Run on a real phone, try Gemma models (via Ollama or Google AI Edge Gallery), and report results. This drives the next autonomous iterations.
 
-## 4. Ollama (required)
-Make sure Ollama is running on your computer and reachable from the Android device (same WiFi recommended).
-
-Recommended models:
-- `llama3.2` or `llama3.1` for text
-- `llava` or `llama3.2-vision` for screenshot analysis
-
-Test with:
-```bash
-ollama run llama3.2
-```
-
-## 5. Run
-- Run the app on a **physical Android device** (emulators have very limited accessibility + overlay support).
-- Grant Overlay + Accessibility permissions.
-- Make sure Ollama is running with a vision-capable model if you want screenshot analysis (e.g. `llava` or `llama3.2-vision`).
-- Open WhatsApp. New messages should trigger the floating emotional assistant.
-
-## Polish Notes
-- The panel has haptic feedback, dynamic loading messages ("Analyzing screenshot..." when vision is attached), and a clear "Vision attached" indicator with a one-tap Clear button.
-- Vision works best when you tap "Add Vision" right before generating on an important message.
-- Auto-paste tries to type directly into WhatsApp first, then falls back to clipboard.
+The goal remains "test until everything is reliably working on device".

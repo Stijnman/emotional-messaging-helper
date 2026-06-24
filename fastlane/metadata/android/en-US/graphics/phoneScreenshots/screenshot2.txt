@@ -1,0 +1,5 @@
+PLACEHOLDER: screenshot2.png
+
+Panel in active use: Figurative intensity slider at ~7, several tone FilterChips selected (e.g. "Deep", "Vulnerable"), "Add Vision" and "Generate" buttons, status line.
+
+Shows the rich control surface of the agent-driven panel.

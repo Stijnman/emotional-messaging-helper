@@ -1,0 +1,1 @@
+Private, local AI (Ollama + agent + 4 toggleable skills) for deep WhatsApp replies. Vision + encrypted memory.

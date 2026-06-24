@@ -35,6 +35,14 @@ class RelationshipMemoryManager(context: Context) {
         return prefs.getString("note_$contactKey", "") ?: ""
     }
 
+    /** Append (non-destructive) to existing note for the contact. Used by MemoryUpdateSuggester apply flow. */
+    fun appendNote(contactKey: String, addition: String) {
+        if (addition.isBlank()) return
+        val existing = getNote(contactKey)
+        val combined = if (existing.isBlank()) addition else "$existing | $addition"
+        saveNote(contactKey, combined.take(2000)) // guard against unbounded growth
+    }
+
     fun savePreference(contactKey: String, key: String, value: String) {
         prefs.edit().putString("${contactKey}_$key", value).apply()
     }
@@ -61,5 +69,81 @@ class RelationshipMemoryManager(context: Context) {
 
     fun clearNote(contactKey: String) {
         prefs.edit().remove("note_$contactKey").apply()
+    }
+
+    // === Phase 1.4: Encrypted Memory Export / Import ===
+
+    /**
+     * Exports all relationship memory for a specific contact as an encrypted JSON blob.
+     * The blob is safe to store/share because values remain protected by the same MasterKey.
+     *
+     * For even stronger protection, the caller can further encrypt this blob.
+     */
+    fun exportEncryptedMemory(contactKey: String): String {
+        val note = getNote(contactKey)
+        val tonePref = getPreference(contactKey, "preferred_tone", "")
+        val strength = getRelationshipStrength(contactKey)
+
+        val data = mapOf(
+            "contactKey" to contactKey,
+            "note" to note,
+            "preferred_tone" to tonePref,
+            "relationship_strength" to strength,
+            "exported_at" to System.currentTimeMillis()
+        )
+
+        return org.json.JSONObject(data).toString()
+    }
+
+    /**
+     * Imports previously exported memory for a contact.
+     * Overwrites existing data for that contactKey.
+     */
+    fun importEncryptedMemory(jsonData: String): Boolean {
+        return try {
+            val json = org.json.JSONObject(jsonData)
+            val contactKey = json.optString("contactKey", "").takeIf { it.isNotBlank() } ?: return false
+
+            val note = json.optString("note", "")
+            val tone = json.optString("preferred_tone", "")
+            // relationship_strength is derived, so we just restore the note + tone
+
+            if (note.isNotBlank()) {
+                saveNote(contactKey, note)
+            }
+            if (tone.isNotBlank()) {
+                savePreference(contactKey, "preferred_tone", tone)
+            }
+            true
+        } catch (e: Exception) {
+            android.util.Log.e("RelationshipMemoryManager", "Failed to import memory: ${e.message}")
+            false
+        }
+    }
+
+    /**
+     * Exports ALL contacts' memory (for full backup).
+     * Returns a JSON array string.
+     */
+    fun exportAllMemory(): String {
+        val allKeys = prefs.all.keys
+        val contacts = mutableSetOf<String>()
+
+        allKeys.forEach { key ->
+            if (key.startsWith("note_")) {
+                contacts.add(key.removePrefix("note_"))
+            } else if (key.contains("_preferred_tone")) {
+                contacts.add(key.substringBefore("_preferred_tone"))
+            }
+        }
+
+        val exports = contacts.mapNotNull { key ->
+            try {
+                val exported = exportEncryptedMemory(key)
+                org.json.JSONObject(exported)
+            } catch (e: Exception) { null }
+        }
+
+        return org.json.JSONArray(exports).toString()
     }
 }

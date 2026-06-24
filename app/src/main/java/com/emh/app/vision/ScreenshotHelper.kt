@@ -42,7 +42,34 @@ object ScreenshotHelper {
 
     /**
      * Returns recommended quality level based on device/network conditions.
-     * Lower quality = faster vision analysis, smaller payload.
+     * Lower quality on mobile data for smaller payloads and faster uploads to local Ollama.
      */
-    fun getRecommendedQuality(): Int = 70
+    fun getRecommendedQuality(onMobileData: Boolean = false): Int {
+        return if (onMobileData) 55 else 70
+    }
+
+    /**
+     * Best-effort detection of mobile data (Phase 3 hardening).
+     * Callers should pass the result to getRecommendedQuality.
+     * Requires no special permissions beyond normal network state.
+     */
+    fun isLikelyOnMobileData(context: android.content.Context): Boolean {
+        return try {
+            val cm = context.getSystemService(android.content.Context.CONNECTIVITY_SERVICE) as? android.net.ConnectivityManager
+            val network = cm?.activeNetwork ?: return false
+            val caps = cm.getNetworkCapabilities(network) ?: return false
+            caps.hasTransport(android.net.NetworkCapabilities.TRANSPORT_CELLULAR) &&
+                !caps.hasTransport(android.net.NetworkCapabilities.TRANSPORT_WIFI)
+        } catch (_: Exception) {
+            false
+        }
+    }
+
+    /**
+     * Multi-frame helper (Phase 3 implemented). Used by callers that have raw Bitmaps.
+     * The active path (ScreenCaptureService ring buffer + panel) works with already-encoded base64.
+     */
+    fun bitmapsToBase64Multi(bitmaps: List<Bitmap>, quality: Int = 70): List<String> {
+        return bitmaps.map { bitmapToBase64(it, quality) }
+    }
 }
