@@ -1,6 +1,7 @@
 package com.emh.app.service
 
 import android.accessibilityservice.AccessibilityService
+import android.graphics.Rect
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import com.emh.app.EMHApplication
@@ -10,14 +11,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 
 /**
- * Production-grade AccessibilityService for detecting new WhatsApp messages.
- *
- * Strategy:
- * - Monitors window content changes in WhatsApp.
- * - Extracts contact name from the conversation header.
- * - Finds the most recent message bubble.
- * - Uses layout position heuristics to determine if the message is incoming (from the other person).
- * - Triggers the floating EMH panel only for new **incoming** messages.
+ * Detects new incoming WhatsApp messages and triggers the floating EMH panel.
  */
 class WhatsAppAccessibilityService : AccessibilityService() {
 
@@ -25,6 +19,7 @@ class WhatsAppAccessibilityService : AccessibilityService() {
 
     private var lastMessageHash: Int = 0
     private var lastContact: String = ""
+    private var lastTriggerTime: Long = 0L
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
         if (event == null) return
@@ -35,7 +30,8 @@ class WhatsAppAccessibilityService : AccessibilityService() {
         when (event.eventType) {
             AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED,
             AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED,
-            AccessibilityEvent.TYPE_VIEW_SCROLLED -> {
+            AccessibilityEvent.TYPE_VIEW_SCROLLED,
+            AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED -> {
                 val root = rootInActiveWindow ?: return
                 processConversation(root)
             }
@@ -47,17 +43,18 @@ class WhatsAppAccessibilityService : AccessibilityService() {
         val latestIncoming = findLatestIncomingMessage(root) ?: return
 
         val messageHash = (contactName + latestIncoming).hashCode()
+        if (messageHash == lastMessageHash && contactName == lastContact) return
 
-        // Avoid spamming the same message
-        if (messageHash == lastMessageHash && contactName == lastContact) {
-            return
-        }
+        val now = System.currentTimeMillis()
+        if (now - lastTriggerTime < 1500) return
 
         lastMessageHash = messageHash
         lastContact = contactName
+        lastTriggerTime = now
 
-        // Trigger the emotional assistant
+        val app = applicationContext as? EMHApplication ?: return
         scope.launch {
+            if (!app.settingsRepository.isAutoAnalyzeEnabled()) return@launch
             FloatingOverlayService.showForMessage(
                 applicationContext,
                 contactKey = contactName,
@@ -66,23 +63,23 @@ class WhatsAppAccessibilityService : AccessibilityService() {
         }
     }
 
-    /**
-     * Extracts the name of the person the user is chatting with.
-     */
     private fun extractContactName(root: AccessibilityNodeInfo): String? {
-        // Common IDs in WhatsApp (these can change between versions)
         val possibleIds = listOf(
             "com.whatsapp:id/conversation_contact_name",
             "com.whatsapp:id/title",
-            "com.whatsapp:id/conversation_title"
+            "com.whatsapp:id/conversation_title",
+            "com.whatsapp:id/contact_name"
         )
 
         for (id in possibleIds) {
-            val nodes = root.findAccessibilityNodeInfosByViewId(id)
-            nodes.firstOrNull()?.text?.toString()?.takeIf { it.isNotBlank() }?.let { return it }
+            root.findAccessibilityNodeInfosByViewId(id)
+                .firstOrNull()
+                ?.text
+                ?.toString()
+                ?.takeIf { it.isNotBlank() }
+                ?.let { return it }
         }
 
-        // Fallback: look for the first TextView near the top that looks like a name
         return findHeaderText(root)
     }
 
@@ -91,7 +88,11 @@ class WhatsAppAccessibilityService : AccessibilityService() {
 
         if (node.className == "android.widget.TextView" && node.text != null) {
             val text = node.text.toString()
-            if (text.length in 2..40 && !text.contains("WhatsApp") && !text.contains("online")) {
+            if (text.length in 2..40 &&
+                !text.contains("WhatsApp", ignoreCase = true) &&
+                !text.contains("online", ignoreCase = true) &&
+                !text.contains("typing", ignoreCase = true)
+            ) {
                 return text
             }
         }
@@ -104,38 +105,64 @@ class WhatsAppAccessibilityService : AccessibilityService() {
     }
 
     /**
-     * Finds the most recent message that appears to be from the other person.
-     *
-     * Heuristic: In WhatsApp, incoming messages are usually left-aligned and have a different
-     * background. We look for message bubbles and prefer those that look incoming.
+     * Prefer the latest message bubble on the left (incoming), skip outgoing (right / ticks).
      */
     private fun findLatestIncomingMessage(root: AccessibilityNodeInfo): String? {
+        val screenWidth = resources.displayMetrics.widthPixels
+        val midX = screenWidth / 2
+
         val messageIds = listOf(
             "com.whatsapp:id/message_text",
-            "com.whatsapp:id/conversation_text"
+            "com.whatsapp:id/conversation_text",
+            "com.whatsapp:id/text"
         )
 
-        val candidates = mutableListOf<String>()
+        var bestText: String? = null
+        var bestBottom = -1
 
         for (id in messageIds) {
-            val nodes = root.findAccessibilityNodeInfosByViewId(id)
-            for (node in nodes) {
-                val text = node.text?.toString()?.trim()
-                if (!text.isNullOrBlank()) {
-                    candidates.add(text)
+            for (node in root.findAccessibilityNodeInfosByViewId(id)) {
+                val text = node.text?.toString()?.trim().orEmpty()
+                if (text.isBlank()) continue
+                if (isOutgoingMessage(node)) continue
+
+                val rect = Rect()
+                node.getBoundsInScreen(rect)
+                if (rect.isEmpty) continue
+
+                val centerX = (rect.left + rect.right) / 2
+                if (centerX > midX + screenWidth * 0.1) continue
+
+                if (rect.bottom > bestBottom) {
+                    bestBottom = rect.bottom
+                    bestText = text
                 }
             }
         }
 
-        if (candidates.isEmpty()) return null
-
-        // Take the last one found (WhatsApp tends to append new messages at the end)
-        return candidates.last()
+        return bestText
     }
 
-    override fun onInterrupt() {
-        // No-op
+    private fun isOutgoingMessage(node: AccessibilityNodeInfo): Boolean {
+        var current: AccessibilityNodeInfo? = node.parent
+        var depth = 0
+        while (current != null && depth < 10) {
+            val tickIds = listOf(
+                "com.whatsapp:id/status",
+                "com.whatsapp:id/message_status",
+                "com.whatsapp:id/timestamp_and_status",
+                "com.whatsapp:id/status_layout"
+            )
+            for (id in tickIds) {
+                if (current.findAccessibilityNodeInfosByViewId(id).isNotEmpty()) return true
+            }
+            current = current.parent
+            depth++
+        }
+        return false
     }
+
+    override fun onInterrupt() {}
 
     override fun onServiceConnected() {
         super.onServiceConnected()
@@ -147,15 +174,9 @@ class WhatsAppAccessibilityService : AccessibilityService() {
         super.onDestroy()
     }
 
-    /**
-     * Attempts to paste the given text into WhatsApp's message input field.
-     * This is best-effort and can break if WhatsApp changes their UI.
-     * FINISHING PASS: Expanded ID lists heavily + extra focus/paste actions + more send heuristics.
-     */
     fun pasteTextIntoWhatsApp(text: String): Boolean {
         val root = rootInActiveWindow ?: return false
 
-        // Comprehensive list of WhatsApp input field IDs across versions (including beta, business, older)
         val inputIds = listOf(
             "com.whatsapp:id/entry",
             "com.whatsapp:id/conversation_entry",
@@ -168,58 +189,33 @@ class WhatsAppAccessibilityService : AccessibilityService() {
             "com.whatsapp:id/input_text"
         )
 
-        var pasted = false
         for (id in inputIds) {
-            val nodes = root.findAccessibilityNodeInfosByViewId(id)
-            for (node in nodes) {
-                if (node.isEditable || node.className?.contains("EditText", ignoreCase = true) == true) {
-                    // Multiple focus attempts
-                    node.performAction(AccessibilityNodeInfo.ACTION_FOCUS)
-                    node.performAction(AccessibilityNodeInfo.ACTION_FOCUS)
+            for (node in root.findAccessibilityNodeInfosByViewId(id)) {
+                if (!node.isEditable &&
+                    node.className?.contains("EditText", ignoreCase = true) != true
+                ) continue
 
-                    // Set text directly (most reliable)
-                    val arguments = android.os.Bundle().apply {
-                        putCharSequence(
-                            android.view.accessibility.AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE,
-                            text
-                        )
-                    }
-                    var success = node.performAction(
-                        android.view.accessibility.AccessibilityNodeInfo.ACTION_SET_TEXT,
-                        arguments
+                node.performAction(AccessibilityNodeInfo.ACTION_FOCUS)
+                val arguments = android.os.Bundle().apply {
+                    putCharSequence(
+                        AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE,
+                        text
                     )
-
-                    // Fallback: try paste action (some versions respond better)
-                    if (!success) {
-                        val pasteBundle = android.os.Bundle().apply {
-                            putCharSequence(
-                                android.view.accessibility.AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE,
-                                text
-                            )
-                        }
-                        success = node.performAction(AccessibilityNodeInfo.ACTION_PASTE, pasteBundle)
-                    }
-
-                    if (success) {
-                        tryClickSendButton(root)
-                        pasted = true
-                        break
-                    }
+                }
+                var success = node.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, arguments)
+                if (!success) {
+                    success = node.performAction(AccessibilityNodeInfo.ACTION_PASTE, arguments)
+                }
+                if (success) {
+                    tryClickSendButton(root)
+                    return true
                 }
             }
-            if (pasted) break
         }
-
-        if (!pasted) {
-            // Last resort: ensure it's in clipboard so user can long-press paste easily
-            // (Floating service already handles main clipboard fallback)
-        }
-
-        return pasted
+        return false
     }
 
     private fun tryClickSendButton(root: AccessibilityNodeInfo) {
-        // Comprehensive send button IDs across WhatsApp versions (finishing pass)
         val sendIds = listOf(
             "com.whatsapp:id/send",
             "com.whatsapp:id/voice_note_send_button",
@@ -239,15 +235,13 @@ class WhatsAppAccessibilityService : AccessibilityService() {
                 }
             }
         }
-
-        // Fallback: look for any clickable node with "send" in description or text
         findAndClickSendRecursively(root)
     }
 
     private fun findAndClickSendRecursively(node: AccessibilityNodeInfo) {
         if (node.isClickable) {
-            val desc = node.contentDescription?.toString()?.lowercase() ?: ""
-            val text = node.text?.toString()?.lowercase() ?: ""
+            val desc = node.contentDescription?.toString()?.lowercase().orEmpty()
+            val text = node.text?.toString()?.lowercase().orEmpty()
             if (desc.contains("send") || text.contains("send")) {
                 node.performAction(AccessibilityNodeInfo.ACTION_CLICK)
                 return
@@ -257,8 +251,6 @@ class WhatsAppAccessibilityService : AccessibilityService() {
             node.getChild(i)?.let { findAndClickSendRecursively(it) }
         }
     }
-
-    // AUTONOMOUS IMPROVEMENT (Odd loops): Added more defensive null checks and broader ID list for future WhatsApp versions.
 
     companion object {
         var instance: WhatsAppAccessibilityService? = null

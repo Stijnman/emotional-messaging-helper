@@ -56,6 +56,8 @@ class SettingsRepository(private val context: Context) {
         context.dataStore.edit { it[Keys.AUTO_ANALYZE] = enabled.toString() }
     }
 
+    suspend fun isAutoAnalyzeEnabled(): Boolean = autoAnalyze.first()
+
     // AUTONOMOUS IMPROVEMENT (Loop 1+): Added for testing and future feature flags.
     suspend fun getAllSettings(): Map<String, String> {
         // Simplified for now - can be expanded in later loops

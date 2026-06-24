@@ -1,6 +1,8 @@
 package com.emh.app.ui.settings
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -13,8 +15,9 @@ import com.emh.app.EMHApplication
 import com.emh.app.ai.OllamaClient
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun SettingsScreen() {
+fun SettingsScreen(modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val app = context.applicationContext as EMHApplication
     val repo = app.settingsRepository
@@ -38,14 +41,16 @@ fun SettingsScreen() {
         repo.autoAnalyze.collect { autoAnalyze = it }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp)
-    ) {
-        Text("Settings", style = MaterialTheme.typography.headlineMedium)
-        Spacer(Modifier.height(24.dp))
+    val scrollState = rememberScrollState()
 
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .verticalScroll(scrollState)
+            .navigationBarsPadding()
+            .imePadding()
+            .padding(horizontal = 20.dp, vertical = 16.dp)
+    ) {
         OutlinedTextField(
             value = ollamaUrl,
             onValueChange = { ollamaUrl = it },

@@ -14,8 +14,8 @@ android {
         minSdk = 26
         //noinspection OldTargetApi
         targetSdk = 35
-        versionCode = 5
-        versionName = "0.3.1" // Complete: voice + memory import fix + device test scripts + release docs
+        versionCode = 6
+        versionName = "0.3.2" // Settings scroll + WhatsApp overlay hardening
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

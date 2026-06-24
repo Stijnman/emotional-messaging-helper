@@ -1,18 +1,25 @@
 package com.emh.app.service
 
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.graphics.PixelFormat
+import android.os.Build
 import android.os.IBinder
+import android.provider.Settings
 import android.view.Gravity
 import android.view.WindowManager
+import android.widget.Toast
 import androidx.compose.ui.platform.ComposeView
+import androidx.core.app.NotificationCompat
+import com.emh.app.R
 import com.emh.app.ui.EmotionalPanel
 
 /**
  * Floating emotional assistant panel that appears over WhatsApp.
- * Now powered by Jetpack Compose.
  */
 class FloatingOverlayService : Service() {
 
@@ -23,12 +30,24 @@ class FloatingOverlayService : Service() {
     override fun onCreate() {
         super.onCreate()
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
+        createNotificationChannel()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val contact = intent?.getStringExtra(EXTRA_CONTACT) ?: "Contact"
         val message = intent?.getStringExtra(EXTRA_MESSAGE) ?: ""
 
+        if (!Settings.canDrawOverlays(this)) {
+            Toast.makeText(
+                this,
+                getString(R.string.overlay_permission_needed),
+                Toast.LENGTH_LONG
+            ).show()
+            stopSelf()
+            return START_NOT_STICKY
+        }
+
+        startForeground(NOTIFICATION_ID, buildNotification())
         showFloatingPanel(contact, message)
         return START_NOT_STICKY
     }
@@ -48,23 +67,34 @@ class FloatingOverlayService : Service() {
                     onVoiceListeningChanged = { listening ->
                         windowLayoutParams?.let { wmParams ->
                             if (listening) {
-                                wmParams.flags = wmParams.flags and WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE.inv()
+                                wmParams.flags = wmParams.flags and
+                                    WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE.inv()
                             } else {
-                                wmParams.flags = wmParams.flags or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                                wmParams.flags = wmParams.flags or
+                                    WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                             }
-                            floatingView?.let { windowManager.updateViewLayout(it, wmParams) }
+                            floatingView?.let { view ->
+                                windowManager.updateViewLayout(view, wmParams)
+                            }
                         }
                     },
                     onSendToWhatsApp = { text ->
-                        val service = com.emh.app.service.WhatsAppAccessibilityService.instance
+                        val service = WhatsAppAccessibilityService.instance
                         val pasted = service?.pasteTextIntoWhatsApp(text) == true
                         if (pasted) {
-                            android.widget.Toast.makeText(this@FloatingOverlayService, "Sent to WhatsApp", android.widget.Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                this@FloatingOverlayService,
+                                "Sent to WhatsApp",
+                                Toast.LENGTH_SHORT
+                            ).show()
                         } else {
                             copyToClipboard(text)
-                            android.widget.Toast.makeText(this@FloatingOverlayService, "Copied to clipboard (paste manually)", android.widget.Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                this@FloatingOverlayService,
+                                "Copied to clipboard (paste manually)",
+                                Toast.LENGTH_SHORT
+                            ).show()
                         }
-                        // AUTONOMOUS IMPROVEMENT (Loop 1+): Added explicit feedback for better user experience in all paste paths.
                     }
                 )
             }
@@ -75,17 +105,22 @@ class FloatingOverlayService : Service() {
             WindowManager.LayoutParams.WRAP_CONTENT,
             WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
-                    WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
+                WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
             PixelFormat.TRANSLUCENT
         ).apply {
             gravity = Gravity.TOP or Gravity.END
-            x = 30
-            y = 100
+            x = 16
+            y = 120
         }
 
         floatingView = composeView
         windowLayoutParams = params
-        windowManager.addView(composeView, params)
+        try {
+            windowManager.addView(composeView, params)
+        } catch (e: Exception) {
+            Toast.makeText(this, "Could not show overlay: ${e.message}", Toast.LENGTH_LONG).show()
+            stopSelf()
+        }
     }
 
     private fun copyToClipboard(text: String) {
@@ -93,10 +128,40 @@ class FloatingOverlayService : Service() {
         clipboard.setPrimaryClip(android.content.ClipData.newPlainText("EMH Reply", text))
     }
 
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                CHANNEL_ID,
+                "EMH Overlay",
+                NotificationManager.IMPORTANCE_LOW
+            ).apply {
+                description = "Shows when the emotional assistant panel is active"
+            }
+            val nm = getSystemService(NotificationManager::class.java)
+            nm.createNotificationChannel(channel)
+        }
+    }
+
+    private fun buildNotification(): Notification {
+        return NotificationCompat.Builder(this, CHANNEL_ID)
+            .setContentTitle(getString(R.string.app_name))
+            .setContentText("Floating assistant active")
+            .setSmallIcon(R.mipmap.ic_launcher)
+            .setOngoing(true)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .build()
+    }
+
     override fun onDestroy() {
         floatingView?.let {
-            windowManager.removeView(it)
+            try {
+                windowManager.removeView(it)
+            } catch (_: Exception) {
+            }
             floatingView = null
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            stopForeground(STOP_FOREGROUND_REMOVE)
         }
         super.onDestroy()
     }
@@ -106,13 +171,27 @@ class FloatingOverlayService : Service() {
     companion object {
         const val EXTRA_CONTACT = "extra_contact"
         const val EXTRA_MESSAGE = "extra_message"
+        private const val CHANNEL_ID = "emh_overlay"
+        private const val NOTIFICATION_ID = 1001
 
         fun showForMessage(context: Context, contactKey: String, message: String) {
+            if (!Settings.canDrawOverlays(context)) {
+                Toast.makeText(
+                    context,
+                    context.getString(R.string.overlay_permission_needed),
+                    Toast.LENGTH_LONG
+                ).show()
+                return
+            }
             val intent = Intent(context, FloatingOverlayService::class.java).apply {
                 putExtra(EXTRA_CONTACT, contactKey)
                 putExtra(EXTRA_MESSAGE, message)
             }
-            context.startService(intent)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                context.startForegroundService(intent)
+            } else {
+                context.startService(intent)
+            }
         }
     }
 }

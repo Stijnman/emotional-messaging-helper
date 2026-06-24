@@ -149,10 +149,15 @@ fun EmotionalPanel(
         }
     }
 
+    val panelWidth = (context.resources.displayMetrics.widthPixels /
+        context.resources.displayMetrics.density).dp.coerceAtMost(340.dp) - 32.dp
+
     Column(
         modifier = Modifier
-            .width(340.dp)
-            .padding(16.dp)
+            .widthIn(max = panelWidth)
+            .heightIn(max = (context.resources.displayMetrics.heightPixels /
+                context.resources.displayMetrics.density).dp * 0.75f)
+            .padding(12.dp)
             .verticalScroll(rememberScrollState())
     ) {
         Text(

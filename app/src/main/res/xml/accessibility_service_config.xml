@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
-    android:accessibilityEventTypes="typeViewTextChanged|typeWindowContentChanged"
+    android:accessibilityEventTypes="typeViewTextChanged|typeWindowContentChanged|typeViewScrolled|typeWindowStateChanged"
     android:accessibilityFeedbackType="feedbackGeneric"
+    android:accessibilityFlags="flagReportViewIds|flagRetrieveInteractiveWindows"
     android:canRetrieveWindowContent="true"
+    android:description="@string/accessibility_service_description"
     android:notificationTimeout="100"
     android:packageNames="com.whatsapp,com.whatsapp.w4b"
     android:settingsActivity="com.emh.app.ui.settings.SettingsActivity" />
