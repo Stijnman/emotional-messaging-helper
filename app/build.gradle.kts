@@ -14,8 +14,8 @@ android {
         minSdk = 26
         //noinspection OldTargetApi
         targetSdk = 35
-        versionCode = 7
-        versionName = "0.3.3" // Fix overlay Compose lifecycle crash + model sanitization
+        versionCode = 8
+        versionName = "0.3.4" // Fix overlay SavedStateRegistryOwner crash
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -60,6 +60,8 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.service)
+    implementation(libs.androidx.lifecycle.viewmodel)
+    implementation(libs.androidx.savedstate)
     implementation(libs.androidx.activity.compose)
 
     // Compose

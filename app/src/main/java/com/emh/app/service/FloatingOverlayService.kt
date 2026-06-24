@@ -15,14 +15,29 @@ import android.widget.Toast
 import androidx.compose.ui.platform.ComposeView
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.LifecycleService
+import androidx.lifecycle.ViewModelStore
+import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.setViewTreeLifecycleOwner
+import androidx.lifecycle.setViewTreeViewModelStoreOwner
+import androidx.savedstate.SavedStateRegistry
+import androidx.savedstate.SavedStateRegistryController
+import androidx.savedstate.SavedStateRegistryOwner
+import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.emh.app.R
 import com.emh.app.ui.EmotionalPanel
 
 /**
  * Floating emotional assistant panel that appears over WhatsApp.
  */
-class FloatingOverlayService : LifecycleService() {
+class FloatingOverlayService : LifecycleService(), SavedStateRegistryOwner, ViewModelStoreOwner {
+
+    private val savedStateRegistryController = SavedStateRegistryController.create(this)
+    override val savedStateRegistry: SavedStateRegistry
+        get() = savedStateRegistryController.savedStateRegistry
+
+    private val overlayViewModelStore = ViewModelStore()
+    override val viewModelStore: ViewModelStore
+        get() = overlayViewModelStore
 
     private lateinit var windowManager: WindowManager
     private var floatingView: ComposeView? = null
@@ -30,6 +45,7 @@ class FloatingOverlayService : LifecycleService() {
 
     override fun onCreate() {
         super.onCreate()
+        savedStateRegistryController.performRestore(null)
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
         createNotificationChannel()
     }
@@ -63,6 +79,8 @@ class FloatingOverlayService : LifecycleService() {
 
         val composeView = ComposeView(this).apply {
             setViewTreeLifecycleOwner(this@FloatingOverlayService)
+            setViewTreeViewModelStoreOwner(this@FloatingOverlayService)
+            setViewTreeSavedStateRegistryOwner(this@FloatingOverlayService)
             setContent {
                 EmotionalPanel(
                     contactKey = contactKey,
@@ -164,6 +182,7 @@ class FloatingOverlayService : LifecycleService() {
             }
             floatingView = null
         }
+        overlayViewModelStore.clear()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             stopForeground(STOP_FOREGROUND_REMOVE)
         }

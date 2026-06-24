@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.3.4] - 2026-06-24
+
+### Fixed
+- **Overlay still crashing**: Compose overlay also requires `SavedStateRegistryOwner` and `ViewModelStoreOwner` on the service (fixes `ViewTreeSavedStateRegistryOwner` crash when opening demo panel or WhatsApp overlay).
+
 ## [0.3.3] - 2026-06-24
 
 ### Fixed
