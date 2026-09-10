@@ -1,73 +1,221 @@
-# EMH Testing & Device Validation
+# Testing Guide
 
-**Project status:** Code complete at v0.3.1. `./gradlew test assembleDebug` passes.
+This document outlines the testing requirements and best practices for the **hermes-prompts** project.
 
-## Quick Test (ADB)
+---
 
-```bash
-export JAVA_HOME=/opt/android-studio/jbr
-export ANDROID_HOME=~/Android/Sdk
-./scripts/test-android.sh
+## 📋 Table of Contents
+
+- [Testing Philosophy](#-testing-philosophy)
+- [Testing Levels](#-testing-levels)
+- [Manual Testing](#-manual-testing)
+- [Automated Testing](#-automated-testing)
+- [Test Checklists](#-test-checklists)
+
+---
+
+## 🎯 Testing Philosophy
+
+### Core Principles
+
+1. **Quality First**: Ensure all prompts produce high-quality, useful output
+2. **Safety**: Verify prompts don't generate harmful or inappropriate content
+3. **Effectiveness**: Test that prompts achieve their intended purpose
+4. **Clarity**: Ensure prompts are clear and unambiguous
+5. **Documentation**: All tests should be documented
+
+### What Must Be Tested
+
+Every prompt **MUST** be tested for:
+- ✅ Output quality and usefulness
+- ✅ Content safety and appropriateness
+- ✅ Clarity and specificity
+- ✅ Ethical considerations
+- ✅ Bias and fairness
+- ✅ Consistency across runs
+
+---
+
+## 🏗️ Testing Levels
+
+### Level 1: Unit Testing (Prompt Validation)
+
+Test individual prompts for correctness and quality.
+
+**Example**: Testing a reasoning prompt
+```python
+# tests/test_prompts.py
+import pytest
+from prompts import REASONING_PROMPT, CODING_PROMPT
+
+
+def test_reasoning_prompt_structure():
+    """Test that reasoning prompt has required structure"""
+    assert "You are" in REASONING_PROMPT
+    assert "Please reason" in REASONING_PROMPT
+    assert len(REASONING_PROMPT) > 100
+
+
+def test_coding_prompt_has_instructions():
+    """Test that coding prompt includes instructions"""
+    assert "write" in CODING_PROMPT.lower() or "create" in CODING_PROMPT.lower()
+    assert "code" in CODING_PROMPT.lower()
 ```
 
-Auto-detects connected phone or emulator, installs APK, grants mic permission, launches EMH.
+### Level 2: Integration Testing
 
-**Ollama URLs:**
-| Target | URL in Settings |
-|--------|-----------------|
-| Physical phone | `http://<pc-lan-ip>:11434` |
-| Android emulator | `http://10.0.2.2:11434` |
-| Waydroid | `http://192.168.240.1:11434` |
+Test prompts in context with actual AI responses.
 
-## Unit Tests
+**Example**: Testing prompt output quality
+```python
+# tests/test_output_quality.py
+import pytest
+from ai_client import generate_response
 
-```bash
-./gradlew test
+
+def test_reasoning_prompt_output():
+    """Test that reasoning prompt produces thoughtful output"""
+    response = generate_response(REASONING_PROMPT + "\n\nExplain quantum computing")
+    
+    # Check for quality indicators
+    assert len(response) > 100
+    assert "quantum" in response.lower()
+    assert any(word in response.lower() for word in ["qubit", "superposition", "entanglement"])
 ```
 
-Covers: skills, agent orchestrator, prompt engine, Ollama client, history manager.
+### Level 3: End-to-End Testing
 
-## Instrumentation Tests
+Test the complete user experience with prompts.
 
-```bash
-./gradlew connectedAndroidTest   # requires device/emulator
+**Manual Test Script**:
+```
+1. Select a prompt from the library
+2. Apply the prompt to a test scenario
+3. Review the generated output
+4. Evaluate quality, safety, and effectiveness
+5. Document any issues
 ```
 
-Skeletons: `EmotionalPanelTest`, `RelationshipMemoryManagerTest`.
+---
 
-## Device Checklist
+## 👤 Manual Testing
 
-| # | Test | Code | Device validation |
-|---|------|------|-------------------|
-| 1 | Unit tests | ✅ Pass | `./gradlew test` |
-| 2 | WhatsApp overlay detection | ✅ | Confirm on physical device |
-| 3 | Paste (accessibility + clipboard fallback) | ✅ | Confirm in WhatsApp |
-| 4 | Ollama + vision (Gemma/llava, multi-frame) | ✅ | Check Ollama in Settings |
-| 5 | Memory export/import (incl. JSON array) | ✅ | Export All → paste → Import |
-| 6 | Agent depth + multi-turn history | ✅ | Compare with agent off/on |
-| 7 | Skills toggle affects output | ✅ | Toggle in Settings, regenerate |
-| 8 | Voice TTS + speech input | ✅ | Grant mic, test 🎤 and Speak |
-| 9 | Full debug build | ✅ | `./gradlew assembleDebug` |
+### Required Manual Tests
 
-## Validated Environments (2026-06-24)
+For **every prompt**, manually test:
 
-- **Samsung Galaxy A54** (Android 16, wireless ADB): APK install + launch OK
-- **Android SDK Emulator** (API 34, headless): boot + install + launch OK
-- **Waydroid** (Lineage 20): install + launch OK (overlay/WhatsApp limited in container)
-- **Ollama bridge**: socat `LAN-IP:11434 → 127.0.0.1:11434` for physical devices
+#### Quality Tests
+- [ ] Prompt produces relevant output
+- [ ] Prompt produces coherent output
+- [ ] Prompt produces useful output
+- [ ] Prompt is clear and understandable
 
-## Manual Flow (5 min)
+#### Safety Tests
+- [ ] No harmful content generated
+- [ ] No inappropriate content generated
+- [ ] No biased content generated
+- [ ] No sensitive data exposed
 
-1. Run `./scripts/setup-ollama.sh` on PC; start `ollama serve`
-2. Install EMH; enable Accessibility + Overlay permissions
-3. Settings → Ollama URL → Save → Check Ollama
-4. Open WhatsApp chat → floating panel appears
-5. Generate reply → verify agent reasoning card
-6. Test voice: Speak / 🎤 buttons
-7. Settings → Export All Memory → paste back → Import
+#### Consistency Tests
+- [ ] Similar inputs produce similar outputs
+- [ ] Prompt works across different scenarios
+- [ ] Prompt handles edge cases
 
-## F-Droid Graphics
+### Manual Testing Checklist Template
 
-Capture real screenshots on device (see `fastlane/metadata/android/en-US/graphics/README.txt`) before store submission.
+```markdown
+# Testing Checklist: [Prompt Name]
 
-See [RELEASE.md](RELEASE.md) for release build steps.
+## Setup
+- [ ] AI model available
+- [ ] Test environment configured
+- [ ] Test scenarios prepared
+
+## Quality Tests
+- [ ] Test 1: Basic usage
+- [ ] Test 2: Complex scenario
+- [ ] Test 3: Edge case
+- [ ] Test 4: Error handling
+
+## Safety Tests
+- [ ] No harmful content: _______________
+- [ ] No inappropriate content: _____________
+- [ ] No biased content: _______________
+- [ ] No sensitive data: ______________
+
+## Results
+- [ ] All tests passed
+- [ ] Issues found: _______________
+- [ ] Notes: _____________________
+```
+
+---
+
+## 🤖 Automated Testing
+
+### Test File Structure
+
+```
+hermes-prompts/
+├── tests/
+│   ├── __init__.py
+│   ├── conftest.py          # Fixtures and setup
+│   ├── test_prompts.py      # Prompt structure tests
+│   ├── test_quality.py      # Output quality tests
+│   └── test_safety.py       # Safety and ethics tests
+```
+
+---
+
+## ✅ Test Checklists
+
+### New Prompt Checklist
+
+Before adding a new prompt to the library:
+
+- [ ] Prompt has clear purpose and description
+- [ ] Prompt is well-structured
+- [ ] Prompt has been manually tested
+- [ ] Prompt produces quality output
+- [ ] Prompt has safety considerations
+- [ ] Prompt is documented
+- [ ] Prompt follows library standards
+
+### Existing Prompt Update Checklist
+
+Before updating an existing prompt:
+
+- [ ] Changes tested with existing functionality
+- [ ] No breaking changes (or documented if breaking)
+- [ ] Version bumped appropriately
+- [ ] Changelog updated
+- [ ] Documentation updated
+
+### Pre-PR Checklist
+
+Before opening a pull request:
+
+- [ ] All manual tests pass
+- [ ] Automated tests pass (if applicable)
+- [ ] Code follows repository standards
+- [ ] Documentation is complete
+- [ ] No sensitive data committed
+- [ ] All links work
+
+---
+
+## 🎯 Summary
+
+| Aspect | Requirement |
+|--------|-------------|
+| Manual Testing | ✅ Required for all prompts |
+| Automated Testing | ⚠️ Recommended for all prompts |
+| Quality Testing | ✅ Required |
+| Safety Testing | ✅ Required |
+| Documentation | ✅ Required |
+
+**Remember**: The quality of your prompts directly impacts the effectiveness and safety of AI-generated content.
+
+---
+
+*Last updated: September 11, 2026*

@@ -1,29 +1,65 @@
-## Description
-Please include a summary of the change and which issue is fixed. Please also include relevant motivation and context.
+# Pull Request
 
-Fixes # (issue)
+## 📌 Description
 
-## Type of change
-Please delete options that are not relevant.
+Please provide a clear description of the changes in this PR.
 
-- [ ] Bug fix (non-breaking change which fixes an issue)
-- [ ] New feature (non-breaking change which adds functionality)
-- [ ] Breaking change (fix or feature that would cause existing functionality to not work as expected)
-- [ ] This change requires a documentation update
+## 🎯 Related Issue
 
-## How Has This Been Tested?
-Please describe the tests that you ran to verify your changes.
+Fixes/Closes # (issue number)
 
-- [ ] Manual testing on physical device + real Ollama (llava for vision)
-- [ ] Unit tests added/updated (EmotionalPromptEngine, OllamaClient, History etc)
-- [ ] CI (testDebugUnitTest) passes via GitHub Actions
-- [ ] UI tested with TalkBack / accessibility
+## ⚙️ Changes Made
 
-## Checklist:
-- [ ] My code follows the style guidelines of this project
-- [ ] I have performed a self-review of my own code
-- [ ] I have commented my code, particularly in hard-to-understand areas
-- [ ] I have made corresponding changes to the documentation
-- [ ] My changes generate no new warnings
-- [ ] I have added tests that prove my fix is effective or that my feature works
-- [ ] New and existing unit tests pass locally with my changes
+- [ ] New feature
+- [ ] Bug fix
+- [ ] Documentation update
+- [ ] Code refactoring
+- [ ] Test addition/improvement
+- [ ] Dependency update
+- [ ] UI/UX improvement
+- [ ] Other: _______________
+
+## 📝 Detailed Changes
+
+- Change 1: Description
+- Change 2: Description
+- Change 3: Description
+
+## ✅ Testing
+
+Describe how you tested these changes:
+
+- [ ] Manual testing completed
+- [ ] Automated tests pass
+- [ ] Tested on different browsers
+- [ ] Tested on mobile devices
+- [ ] All links work
+- [ ] No console errors
+- [ ] TypeScript compiles without errors
+- [ ] Linting passes
+
+## 📎 Screenshots (if applicable)
+
+Add screenshots showing the changes if relevant.
+
+## 📊 Impact
+
+- [ ] Breaking change (requires version bump)
+- [ ] Non-breaking change
+- [ ] Documentation only
+- [ ] API changes
+
+## 🎫 Checklist
+
+- [ ] Code follows repository guidelines
+- [ ] All tests pass
+- [ ] Documentation updated
+- [ ] No sensitive data included
+- [ ] All links work
+- [ ] Commit messages are clear
+- [ ] Version numbers updated (if applicable)
+- [ ] Dependencies updated (if applicable)
+
+---
+
+**Note**: By submitting this pull request, you agree to follow the [Code of Conduct](CODE_OF_CONDUCT.md).
