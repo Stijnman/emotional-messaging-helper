@@ -23,7 +23,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
           java-version: '17'
@@ -32,21 +32,28 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
         with:
           cache-read-only: ${{ github.ref != 'refs/heads/main' && github.ref != 'refs/heads/master' }}
-          gradle-home-cache-cleanup: true
-          # Best practice: Enable dependency graph for Dependabot security updates
-          dependency-graph: generate
+          cache-cleanup: on-success
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
+      - name: Select Gradle command
+        id: gradle
+        shell: bash
+        run: |
+          if [[ -f gradle/wrapper/gradle-wrapper.jar ]]; then
+            chmod +x gradlew
+            echo 'cmd=./gradlew' >> "$GITHUB_OUTPUT"
+          else
+            echo 'Wrapper JAR is not tracked; using the runner Gradle installation.'
+            echo 'cmd=gradle' >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Build Debug APK
-        run: ./gradlew assembleDebug --build-cache
+        run: ${{ steps.gradle.outputs.cmd }} assembleDebug --build-cache
 
       - name: Run Lint
-        run: ./gradlew lintDebug
+        run: ${{ steps.gradle.outputs.cmd }} lintDebug
 
       - name: Run Unit Tests
-        run: ./gradlew testDebugUnitTest
+        run: ${{ steps.gradle.outputs.cmd }} testDebugUnitTest
 
       - name: Upload test results
         if: always()
@@ -56,10 +63,15 @@ jobs:
           path: |
             app/build/reports/tests/
             app/build/test-results/
+          if-no-files-found: ignore
           retention-days: 14
 
-      - name: Run ktlint (if configured)
-        run: ./gradlew ktlintCheck || true
+      - name: Run ktlint when configured
+        shell: bash
+        run: |
+          if ${{ steps.gradle.outputs.cmd }} tasks --all | grep -q '^ktlintCheck'; then
+            ${{ steps.gradle.outputs.cmd }} ktlintCheck
+          fi
 
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
@@ -73,4 +85,5 @@ jobs:
         with:
           name: lint-report-${{ github.sha }}
           path: app/build/reports/lint-results-debug.html
+          if-no-files-found: ignore
           retention-days: 14

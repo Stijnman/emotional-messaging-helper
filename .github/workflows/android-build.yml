@@ -8,29 +8,30 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-    - name: Install JDK
-      uses: actions/setup-java@v3
-      with:
-        java-version: 17
-        distribution: "temurin"
+      - name: Install JDK
+        uses: actions/setup-java@v5
+        with:
+          java-version: "17"
+          distribution: temurin
 
-    - name: Generate Gradle Wrapper
-      run: gradle wrapper --gradle-version 8.9
+      - name: Set up Gradle 9.4.1
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "9.4.1"
 
-    - name: Cache Gradle dependencies
-      uses: actions/cache@v3
-      with:
-        path: ~/.gradle/caches
-        key: gradle-${{ runner.os }}-${{ github.sha }}
-        restore-keys: gradle-${{ runner.os }}-
+      - name: Generate compatible Gradle wrapper
+        run: gradle wrapper --gradle-version 9.4.1
 
-    - name: Build APK
-      run: ./gradlew assembleDebug
+      - name: Build APK
+        run: ./gradlew assembleDebug --build-cache

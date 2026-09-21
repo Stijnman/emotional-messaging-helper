@@ -1,17 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.emh.app">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!-- Permissions -->
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
-    <!-- Media projection for vision screenshots (declared via foregroundServiceType on service) -->
 
     <application
         android:name=".EMHApplication"
@@ -23,7 +24,6 @@
         android:theme="@style/Theme.EMH"
         android:usesCleartextTraffic="true">
 
-        <!-- Main Activity -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -35,7 +35,6 @@
             </intent-filter>
         </activity>
 
-        <!-- Accessibility Service for WhatsApp message detection + direct paste via ACTION_SET_TEXT -->
         <service
             android:name=".service.WhatsAppAccessibilityService"
             android:exported="false"
@@ -48,7 +47,6 @@
                 android:resource="@xml/accessibility_service_config" />
         </service>
 
-        <!-- Floating Overlay Service -->
         <service
             android:name=".service.FloatingOverlayService"
             android:exported="false"
@@ -58,15 +56,11 @@
                 android:value="emotional_messaging_overlay" />
         </service>
 
-        <!-- Screen Capture Service (for vision) -->
         <service
             android:name=".vision.ScreenCaptureService"
             android:exported="false"
             android:foregroundServiceType="mediaProjection" />
 
-        <!-- AUTONOMOUS IMPROVEMENT (All loops): Service declarations reviewed and hardened for stability. -->
-
-        <!-- Settings Activity -->
         <activity
             android:name=".ui.settings.SettingsActivity"
             android:exported="false"

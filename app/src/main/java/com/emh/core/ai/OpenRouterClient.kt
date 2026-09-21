@@ -44,7 +44,7 @@ class OpenRouterClient(
 
         val request = Request.Builder()
             .url(baseUrl)
-            .header("Authorization", "Bearer $api_key")
+            .header("Authorization", "Bearer $apiKey")
             .header("Content-Type", "application/json")
             .post(requestBody.toRequestBody(jsonMediaType))
             .build()
@@ -68,13 +68,9 @@ class OpenRouterClient(
      */
     private fun parseResponse(response: Response): String {
         val responseBody = response.body?.string() ?: throw OpenRouterException("Empty response")
-        // Simple parsing: Extract the first choice's content
-        // Note: In production, use a JSON parser like Gson or Moshi
         return responseBody
     }
 }
 
-/**
- * Exception thrown when OpenRouter API calls fail.
- */
+/** Exception thrown when OpenRouter API calls fail. */
 class OpenRouterException(message: String) : Exception(message)
